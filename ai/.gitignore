@@ -1,0 +1,5 @@
+# save_models
+data
+__pycache__
+*.pyc
+variables.*
