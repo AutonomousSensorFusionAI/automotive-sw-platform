@@ -1,52 +1,70 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="1200px" preserveAspectRatio="none" style="width:504px;height:1200px;background:#FFFFFF;" version="1.1" viewBox="0 0 504 1200" width="504px" zoomAndPan="magnify"><defs/><g><rect fill="none" height="29.2295" id="_title" style="stroke:none;stroke-width:1.0;" width="247" x="121.5" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="237" x="126.5" y="26.1533">Automotive Common S/W Platform</text><!--MD5=[7442f3b126ee602ae02566c1a49e158a]
-cluster api--><g id="cluster_api"><rect fill="none" height="446" rx="2.5" ry="2.5" style="stroke:#444444;stroke-width:1.0;stroke-dasharray:7.0,7.0;" width="491" x="7" y="282.2295"/><text fill="#444444" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="116" x="194.5" y="302.6904">API Application</text><text fill="#444444" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="63" x="221" y="320.0518">[Container]</text></g><!--MD5=[30860e21ba0e39165c540f9e23fe2d63]
-entity sign--><g id="elem_sign"><rect fill="#85BBF0" height="116.1475" rx="2.5" ry="2.5" style="stroke:#78A8D8;stroke-width:0.5;" width="203" x="30.5" y="359.7295"/><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="133" x="65.5" y="388.1904">Sign In Controller</text><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="113" x="75.5" y="405.5518">[MVC Rest Controlle]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="130" y="424.3418"> </text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="179" x="40.5" y="443.5713">Allows users to sign in to the</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="150" x="57" y="462.8008">internet banking system</text></g><!--MD5=[4d2c1095686cc4272d4556037dedae14]
-entity accounts--><g id="elem_accounts"><rect fill="#85BBF0" height="157.3535" rx="2.5" ry="2.5" style="stroke:#78A8D8;stroke-width:0.5;" width="188" x="285" y="339.2295"/><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="150" x="302" y="367.6904">Accounts Summary</text><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="76" x="341" y="389.667">Controller</text><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="113" x="322.5" y="407.0283">[MVC Rest Controlle]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="377" y="425.8184"> </text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="164" x="295" y="445.0479">Provides customers with a</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="140" x="307" y="464.2773">summory of their bank</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="57" x="350.5" y="483.5068">accounts</text></g><!--MD5=[6f1da96282e479ff2a49312c7753703d]
-entity security--><g id="elem_security"><rect fill="#85BBF0" height="135.377" rx="2.5" ry="2.5" style="stroke:#78A8D8;stroke-width:0.5;" width="218" x="23" y="575.7295"/><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="157" x="53.5" y="604.1904">Security Component</text><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="74" x="95" y="621.5518">[Spring Bean]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="130" y="640.3418"> </text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="198" x="33" y="659.5713">Provides functionality related to</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="126" x="67" y="678.8008">singing in, changing</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="83" y="698.0303">passwords, etc.</text></g><!--MD5=[8f94240328f985b36a3be06efd5d45ef]
-entity mbsfacade--><g id="elem_mbsfacade"><rect fill="#85BBF0" height="138.124" rx="2.5" ry="2.5" style="stroke:#78A8D8;stroke-width:0.5;" width="206" x="276" y="574.2295"/><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="147" x="303.5" y="602.6904">Mainframe Banking</text><text fill="#000000" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="117" x="320.5" y="624.667">System Facade</text><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="74" x="342" y="642.0283">[Spring Bean]</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="377" y="660.8184"> </text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="182" x="286" y="680.0479">A facade onto the mainframe</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="102" x="328" y="699.2773">banking system.</text></g><!--MD5=[33573e971ff506c0f246109ca3fd77bd]
-entity spa--><g id="elem_spa"><rect fill="#438DD5" height="154.6064" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="201" x="33.5" y="47.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="181" x="43.5" y="75.6904">Single Page Application</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="127" x="70.5" y="93.0518">[javascript and angular]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="132" y="111.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="149" x="57.5" y="131.0713">Provides all the internet</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="145" x="59.5" y="150.3008">banking functionality to</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="148" x="58" y="169.5303">customers via their web</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="54" x="107" y="188.7598">browser.</text></g><!--MD5=[99c5416311fbf9d118be657efd773f39]
-entity ma--><g id="elem_ma"><rect fill="#438DD5" height="154.6064" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="217" x="269.5" y="47.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="85" x="335.5" y="75.6904">Mobile App</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="53" x="351.5" y="93.0518">[Xamarin]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="376" y="111.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="197" x="279.5" y="131.0713">Provides a limited subset ot the</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="197" x="279.5" y="150.3008">internet banking functionality to</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="164" x="294" y="169.5303">customers via their mobile</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="90" x="333" y="188.7598">mobile device.</text></g><!--MD5=[7468467f3b6b392f1d176d828c753b77]
-entity db--><g id="elem_db"><path d="M37,818.2295 C37,808.2295 132,808.2295 132,808.2295 C132,808.2295 227,808.2295 227,818.2295 L227,961.8359 C227,971.8359 132,971.8359 132,971.8359 C132,971.8359 37,971.8359 37,961.8359 L37,818.2295 " fill="#438DD5" style="stroke:#3C7FC0;stroke-width:0.5;"/><path d="M37,818.2295 C37,828.2295 132,828.2295 132,828.2295 C132,828.2295 227,828.2295 227,818.2295 " fill="none" style="stroke:#3C7FC0;stroke-width:0.5;"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="72" x="96" y="850.6904">Database</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="168" x="48" y="868.0518">[Relational Database Schema]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="130" y="886.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="148" x="56" y="906.0713">Stores user registration</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="125" x="67.5" y="925.3008">information, hashed</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="166" x="47" y="944.5303">authentication credentials,</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="79.5" y="963.7598">access logs, etc.</text></g><!--MD5=[caf83f36d3620b5db28366bd7d249751]
-entity mbs--><g id="elem_mbs"><rect fill="#999999" height="140.8711" rx="2.5" ry="2.5" style="stroke:#8A8A8A;stroke-width:0.5;" width="209" x="274.5" y="819.7295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="147" x="303.5" y="848.1904">Mainframe Banking</text><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="57" x="350.5" y="870.167">System</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="377" y="889.8359"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="185" x="284.5" y="909.0654">Stores all of the core banking</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="183" x="285.5" y="928.2949">information about customers,</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="173" x="292.5" y="947.5244">accounts, transactions, etc.</text></g><!--MD5=[95dadc5fd8c5c901d6969e2e98c70c21]
-link sign to security--><g id="link_sign_security"><path d="M132,475.9995 C132,503.7795 132,537.5095 132,567.3095 " fill="none" id="sign-to-security" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="132,575.5995,135,567.5995,129,567.5995,132,575.5995" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="133" y="541.0752">Uses</text></g><!--MD5=[42d8fcfb42dec18b2b51d602409b2c47]
-link accounts to mbsfacade--><g id="link_accounts_mbsfacade"><path d="M379,496.2695 C379,518.8395 379,543.4695 379,565.9595 " fill="none" id="accounts-to-mbsfacade" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="379,574.1395,382,566.1395,376,566.1395,379,574.1395" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="380" y="541.0752">Uses</text></g><!--MD5=[2f3b256d614db35f96be6b3c1201bf4f]
-link security to db--><g id="link_security_db"><path d="M132,710.8495 C132,738.3095 132,770.5395 132,799.9895 " fill="none" id="security-to-db" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="132,808.2095,135,800.2095,129,800.2095,132,808.2095" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="87" x="133" y="759.0752">Read &amp; write to</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="38" x="157.5" y="775.5576">[JDBC]</text></g><!--MD5=[db502886685a38a9fde1816e185dd0e0]
-link mbsfacade to mbs--><g id="link_mbsfacade_mbs"><path d="M379,712.4795 C379,743.1495 379,779.5095 379,811.2595 " fill="none" id="mbsfacade-to-mbs" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="379,819.6495,382,811.6495,376,811.6495,379,819.6495" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="401.5" y="759.0752">Uses</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="72" x="380" y="775.5576">[XML/HTTPS]</text></g><!--MD5=[c99bcb02a7404ff7207e229366f7705a]
-link spa to sign--><g id="link_spa_sign"><path d="M81.53,202.3395 C76.83,212.0595 72.8,222.1495 70,232.2295 C58.83,272.5095 72.93,316.9395 90.49,352.1095 " fill="none" id="spa-to-sign" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="94.28,359.4695,93.2702,350.9854,87.9406,353.7413,94.28,359.4695" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="96.5" y="247.0752">Uses</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="80" x="71" y="263.5576">[JSON/HTTPS]</text></g><!--MD5=[cadaf8a8a3c36cf6631f6dffced8899b]
-link spa to accounts--><g id="link_spa_accounts"><path d="M149.74,202.5395 C158.36,226.3895 171.63,250.5195 192,266.2295 C212.95,282.3895 227.61,261.8495 251,274.2295 C277.6,288.3095 301.38,310.2395 321.02,332.7095 " fill="none" id="spa-to-accounts" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="326.45,339.0595,323.5246,331.0319,318.9675,334.9349,326.45,339.0595" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="218.5" y="247.0752">Uses</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="80" x="193" y="263.5576">[JSON/HTTPS]</text></g><!--MD5=[f21b9bec839c07106b83575f200b93d2]
-link ma to sign--><g id="link_ma_sign"><path d="M330.04,202.5495 C314.74,224.2795 296.85,247.1895 278,266.2295 C273.75,270.5295 271.54,270.2395 267,274.2295 C239.26,298.5895 210.83,327.8395 187.26,353.4895 " fill="none" id="ma-to-sign" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="181.68,359.5895,189.2896,355.7044,184.8587,351.6588,181.68,359.5895" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="333.5" y="247.0752">Uses</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="80" x="308" y="263.5576">[JSON/HTTPS]</text></g><!--MD5=[334addda0037abd6e432739e1785e7cb]
-link ma to accounts--><g id="link_ma_accounts"><path d="M395.79,202.5195 C397.53,212.4695 399.01,222.5595 400,232.2295 C403.29,264.4695 400.76,299.8295 396.48,330.8995 " fill="none" id="ma-to-accounts" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="395.29,339.1195,399.4026,331.6304,393.4642,330.7729,395.29,339.1195" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="29" x="427.5" y="247.0752">Uses</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="80" x="402" y="263.5576">[JSON/HTTPS]</text></g><rect fill="none" height="189.0654" id="_legend" rx="7.5" ry="7.5" style="stroke:none;stroke-width:1.0;" width="144" x="338" y="995.8359"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="53" x="344" y="1019.9893">Legend</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="397" y="1019.9893"> </text><rect fill="#08427B" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1023.0654"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="348" y="1039.2188">person</text><rect fill="#1168BD" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1042.2949"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="348" y="1058.4482">system</text><rect fill="#438DD5" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1061.5244"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59" x="348" y="1077.6777">container</text><rect fill="#85BBF0" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1080.7539"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="70" x="348" y="1096.9072">component</text><rect fill="#686868" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1099.9834"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="348" y="1116.1367">external person</text><rect fill="#999999" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1119.2129"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="348" y="1135.3662">external system</text><rect fill="#B3B3B3" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1138.4424"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113" x="348" y="1154.5957">external container</text><rect fill="#CCCCCC" height="19.2295" style="stroke:none;stroke-width:1.0;" width="132" x="344" y="1157.6719"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="124" x="348" y="1173.8252">external component</text><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1003.8359" y2="1003.8359"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1023.0654" y2="1023.0654"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1042.2949" y2="1042.2949"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1061.5244" y2="1061.5244"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1080.7539" y2="1080.7539"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1099.9834" y2="1099.9834"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1119.2129" y2="1119.2129"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1138.4424" y2="1138.4424"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1157.6719" y2="1157.6719"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="476" y1="1176.9014" y2="1176.9014"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="344" x2="344" y1="1003.8359" y2="1176.9014"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="476" x2="476" y1="1003.8359" y2="1176.9014"/><!--MD5=[367241a518f70697446acd39ce08a159]
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="1769px" preserveAspectRatio="none" style="width:1056px;height:1769px;background:#FFFFFF;" version="1.1" viewBox="0 0 1056 1769" width="1056px" zoomAndPan="magnify"><defs/><g><rect fill="none" height="29.2295" id="_title" style="stroke:none;stroke-width:1.0;" width="163" x="439.5" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="153" x="444.5" y="26.1533">Common S/W Platform</text><!--MD5=[a372f9c76545d77beb3da89e9ef8258e]
+entity Sensing--><g id="elem_Sensing"><rect fill="#438DD5" height="135.377" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="200" x="133" y="298.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="63" x="201.5" y="326.6904">Sensing</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="191" y="344.0518">[Node / Library]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="231" y="362.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="163" x="149.5" y="382.0713">LiDAR, Radar, Camera 등</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="176" x="143" y="401.3008">다양한 센서로부터 데이터를</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="28" x="219" y="420.5303">수집</text></g><!--MD5=[e123b851c323555021e847fb718eb6a4]
+entity Localization--><g id="elem_Localization"><rect fill="#438DD5" height="154.6064" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="210" x="380" y="1435.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="93" x="438.5" y="1463.6904">Localization</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="443" y="1481.0518">[Node / Library]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="483" y="1499.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="176" x="395" y="1519.0713">다양한 방법과 알고리즘으로</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="180" x="393" y="1538.3008">차량의 위치를 추정하기 위한</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="186" x="390" y="1557.5303">노드(구현체) 및 라이브러리를</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="42" x="464" y="1576.7598">제공함</text></g><!--MD5=[f8ab5d1df7d1ab980dabb1e88d5d035f]
+entity Perception--><g id="elem_Perception"><rect fill="#438DD5" height="173.8359" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="218" x="327" y="511.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="83" x="394.5" y="539.6904">Perception</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="45" x="413.5" y="557.0518">[Library]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="434" y="575.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="190" x="339" y="595.0713">센서 데이터 처리(인지)를 위한</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="170" x="349" y="614.3008">노드 및 라이브러리로, 센서</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="198" x="337" y="633.5303">데이터 전처리를 위한 필터링 및</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="166" x="351" y="652.7598">대용량 데이터 압축등 전체</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="130" x="371" y="671.9893">파이프라인을 담당함</text></g><!--MD5=[4243c1601d305ab699cf48f8763533aa]
+entity Planning--><g id="elem_Planning"><rect fill="#438DD5" height="154.6064" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="204" x="504" y="992.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="68" x="572" y="1020.6904">Planning</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="45" x="583.5" y="1038.0518">[Library]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="604" y="1056.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="170" x="519" y="1076.0713">주행 경로 및 궤적 최적화를</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="180" x="514" y="1095.3008">담당하며 복잡한 경로 최적화</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="166" x="521" y="1114.5303">문제를 단순화 시키기 위한</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="176" x="518" y="1133.7598">다양한 라이브러리를 제공함</text></g><!--MD5=[c31344101066c7cec356c83fbca1228f]
+entity Control--><g id="elem_Control"><rect fill="#438DD5" height="154.6064" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="218" x="803" y="992.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="57" x="883.5" y="1020.6904">Control</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="84" x="870" y="1038.0518">[Node / Library]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="910" y="1056.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="170" x="825" y="1076.0713">차량의 제어를 위한 노드로,</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="198" x="813" y="1095.3008">종방향 및 횡방향에 대한 명령을</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="194" x="813" y="1114.5303">통해 차량 제어부와 직접적으로</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="42" x="891" y="1133.7598">통신함</text></g><!--MD5=[5e8458fc74cfbf7968039e8c85f78e33]
+entity VehicleInterface--><g id="elem_VehicleInterface"><rect fill="#438DD5" height="116.1475" rx="2.5" ry="2.5" style="stroke:#3C7FC0;stroke-width:0.5;" width="204" x="832" y="1241.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="126" x="871" y="1269.6904">Vehicle Interface</text><text fill="#FFFFFF" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="135" x="866.5" y="1287.0518">[Sensor/Actuator Drivers]</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="932" y="1305.8418"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="180" x="842" y="1325.0713">각종 센서 및 엑츄에이터와의</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="88" x="890" y="1344.3008">연동을 담당함</text></g><!--MD5=[9bbcb0f89fccf3e54d4b030d562bdeb5]
+entity PerceptionPlanningSw--><g id="elem_PerceptionPlanningSw"><rect fill="#999999" height="118.8945" rx="2.5" ry="2.5" style="stroke:#8A8A8A;stroke-width:0.5;" width="220" x="617" y="779.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="102" x="676" y="807.6904">인지/판단 SW</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="725" y="827.3594"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="154" x="648" y="846.5889">인지/판단 S/W로 이 과제</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="200" x="627" y="865.8184">내에서는 와이즈오토모티브에서</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="28" x="713" y="885.0479">담당</text></g><!--MD5=[80a3851fdf1d07c6bf6b10074ef5a8cf]
+entity Middleware--><g id="elem_Middleware"><rect fill="#999999" height="157.3535" rx="2.5" ry="2.5" style="stroke:#8A8A8A;stroke-width:0.5;" width="220" x="7" y="47.2295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="87" x="73.5" y="75.6904">Middleware</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="115" y="95.3594"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="178" x="26" y="114.5889">공통 S/W 플랫폼과 연계되어</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="196" x="17" y="133.8184">컴퓨팅 H/W와 센서 등의 연결을</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="172" x="29" y="153.0479">위한 HAL(Hardware Access</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="198" x="18" y="172.2773">Layer)과 내부 통신을 위한 DDS</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="102" x="66" y="191.5068">Broker로 구성됨</text></g><!--MD5=[c796543839e6086ac460deba3cd4e684]
+entity Vehicle--><g id="elem_Vehicle"><rect fill="#999999" height="80.4355" rx="2.5" ry="2.5" style="stroke:#8A8A8A;stroke-width:0.5;" width="138" x="865" y="1472.7295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="56" x="906" y="1501.1904">Vehicle</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="932" y="1520.8594"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="118" x="875" y="1540.0889">자율주행 차량 H/W</text></g><!--MD5=[9cacda53069815fa726b097df65cccc8]
+entity Sensors--><g id="elem_Sensors"><rect fill="#999999" height="80.4355" rx="2.5" ry="2.5" style="stroke:#8A8A8A;stroke-width:0.5;" width="174" x="262" y="85.7295"/><text fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="bold" lengthAdjust="spacing" textLength="64" x="317" y="114.1904">Sensors</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="347" y="133.8594"> </text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="154" x="272" y="153.0889">Lidar, Camera, GPS etc.</text></g><!--MD5=[2c4dbe637650cc2d3e9047868241cb75]
+link Middleware to Sensing--><g id="link_Middleware_Sensing"><path d="M154.82,204.3295 C168.36,232.0995 183.57,263.2995 196.95,290.7595 " fill="none" id="Middleware-to-Sensing" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="200.49,298.0195,199.6703,289.5149,194.2803,292.1509,200.49,298.0195" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="40" x="213" y="249.0752">Socket</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="92" x="187" y="265.5576">[DDS (Pub/Sub)]</text></g><!--MD5=[2196fc89b8993a04511aae8fd27a99e0]
+link Sensors to Sensing--><g id="link_Sensors_Sensing"><path d="M333.44,165.9995 C321.75,194.6995 304.89,234.3495 288,268.2295 C284.35,275.5395 280.41,283.0795 276.36,290.5595 " fill="none" id="Sensors-to-Sensing" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="272.29,298.0195,278.7561,292.4347,273.4895,289.5601,272.29,298.0195" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="103" x="304" y="257.0752">Socket, Serial etc.</text></g><!--MD5=[187cd5a3561aa25a342c6537191504c4]
+link Sensing to Perception--><g id="link_Sensing_Perception"><path d="M291.72,433.3995 C311.36,455.7095 333.63,480.9895 354.68,504.8995 " fill="none" id="Sensing-to-Perception" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="360.01,510.9395,356.9728,502.9535,352.4707,506.9197,360.01,510.9395" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="75" x="330" y="478.0752">Sensing Data</text></g><!--MD5=[181f67141f07600698522ecf30f06d0d]
+link Perception to Planning--><g id="link_Perception_Planning"><path d="M426.57,685.3695 C423.25,746.9895 425.89,830.6495 454,898.2295 C467.32,930.2595 489.29,960.3195 512.44,985.9995 " fill="none" id="Perception-to-Planning" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="518.03,992.0895,514.8218,984.1707,510.406,988.2328,518.03,992.0895" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="144" x="455" y="844.5752">Surrounding Environment</text></g><!--MD5=[4f86122424ba70b7680b585d5d7a61ca]
+link Planning to Control--><g id="link_Planning_Control"><path d="M708.32,1069.7295 C735.99,1069.7295 766.16,1069.7295 794.59,1069.7295 " fill="none" id="Planning-to-Control" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="802.96,1069.7295,794.96,1066.7295,794.96,1072.7295,802.96,1069.7295" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="58" x="726.5" y="1063.5752">Trajectory</text></g><!--MD5=[ae1e3b8f6ffac3cd197a339940b0cc58]
+link Control to VehicleInterface--><g id="link_Control_VehicleInterface"><path d="M834.95,1147.2895 C823.2,1167.6395 817.92,1189.9095 828,1211.2295 C832.02,1219.7195 837.31,1227.6595 843.4,1235.0195 " fill="none" id="Control-to-VehicleInterface" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="848.68,1241.0595,845.6737,1233.0618,841.1563,1237.0106,848.68,1241.0595" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="110" x="829" y="1200.0752">Vehicle Commands</text></g><!--MD5=[932a3f7736ce17a17e6c3e907c1d5632]
+link VehicleInterface to Control--><g id="link_VehicleInterface_Control"><path d="M941.5,1241.2195 C942.54,1231.2395 943.44,1220.9395 944,1211.2295 C944.86,1196.1395 946.2,1192.1795 944,1177.2295 C942.95,1170.0795 941.52,1162.7395 939.85,1155.4195 " fill="none" id="VehicleInterface-to-Control" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="937.94,1147.4895,936.8963,1155.9695,942.7296,1154.5648,937.94,1147.4895" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="99" x="946" y="1192.0752">Steering, Velocity</text><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="55" x="969.5" y="1208.5576">Feedback</text></g><!--MD5=[6e2154d00e6338b63471b1957c02ac53]
+link VehicleInterface to Vehicle--><g id="link_VehicleInterface_Vehicle"><path d="M934,1365.7295 C934,1397.5695 934,1435.1295 934,1464.1795 " fill="none" id="VehicleInterface-Vehicle" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="934,1472.5195,937,1464.5195,931,1464.5195,934,1472.5195" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="934,1357.4595,931,1365.4595,937,1365.4595,934,1357.4595" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="109" x="935" y="1402.0752">CAN, Socket, Serial</text></g><!--MD5=[d117a7045576266fc9b00ed3eb8f36be]
+link Sensing to Localization--><g id="link_Sensing_Localization"><path d="M220.15,433.2695 C212.4,479.1695 204,541.6695 204,597.2295 C204,597.2295 204,597.2295 204,1300.2295 C204,1388.8095 294.24,1444.9095 372.44,1476.9095 " fill="none" id="Sensing-to-Localization" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="379.97,1479.9295,373.6602,1474.1687,371.4281,1479.7381,379.97,1479.9295" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="116" x="205" y="943.0752">Current Position and</text><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="45" x="242" y="959.5576">Velocity</text></g><!--MD5=[dab36a90d3026d06520050bda5e3c920]
+link Localization to Perception--><g id="link_Localization_Perception"><path d="M405.7,1435.2195 C375.41,1397.9195 348,1350.3195 348,1300.2295 C348,837.7295 348,837.7295 348,837.7295 C348,787.8695 365.14,735.5795 384.28,692.6995 " fill="none" id="Localization-to-Perception" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="387.62,685.3595,381.5767,691.3992,387.0382,693.8837,387.62,685.3595" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="116" x="349" y="1067.5752">Current Position and</text><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="43" x="387" y="1084.0576">velocity</text></g><!--MD5=[bce041022ec2367b28602cbf0d0fa75d]
+link Localization to Planning--><g id="link_Localization_Planning"><path d="M484.49,1435.1895 C486.07,1380.1095 492.26,1304.6595 512,1241.2295 C521.22,1211.5995 535.91,1181.2995 550.97,1154.6195 " fill="none" id="Localization-to-Planning" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="555.01,1147.5495,548.4337,1153.0041,553.6419,1155.9832,555.01,1147.5495" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="116" x="513" y="1297.0752">Current Position and</text><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="43" x="551" y="1313.5576">velocity</text></g><!--MD5=[0867931962e6e42a7422e48297a7e195]
+link Localization to Control--><g id="link_Localization_Control"><path d="M569.92,1435.1395 C593.35,1411.5395 617.62,1384.5395 637,1357.2295 C670.24,1310.3795 657.8,1285.8295 694,1241.2295 C722.86,1205.6695 760.46,1172.9595 796.28,1145.8995 " fill="none" id="Localization-to-Control" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="802.94,1140.9095,794.7366,1143.2978,798.3297,1148.1029,802.94,1140.9095" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="116" x="695" y="1297.0752">Current Position and</text><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="43" x="733" y="1313.5576">velocity</text></g><!--MD5=[74deecf029c7a98e1b5ab68110390958]
+link VehicleInterface to Localization--><g id="link_VehicleInterface_Localization"><path d="M831.83,1348.3495 C762.03,1381.2395 669.51,1424.8195 597.59,1458.6995 " fill="none" id="VehicleInterface-to-Localization" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="590.25,1462.1495,598.7666,1461.4657,596.217,1456.0343,590.25,1462.1495" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="83" x="737" y="1402.0752">VehicleSensor</text></g><!--MD5=[8707e09b518659bb981d8e68fb59418c]
+link PerceptionPlanningSw to Perception--><g id="link_PerceptionPlanningSw_Perception"><path d="M691.33,779.1295 C676.31,757.4195 657.54,733.6295 637,715.2295 C611.78,692.6495 581.47,672.3995 552.12,655.3695 " fill="none" id="PerceptionPlanningSw-to-Perception" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="545.08,651.3395,550.5244,657.9242,553.5116,652.7207,545.08,651.3395" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="136" x="669" y="730.0752">Semantic Segmentation</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="27" x="723.5" y="746.5576">[IPC]</text></g><!--MD5=[9f26fe91da1c0a9e67ababcaad19c6de]
+link Perception to PerceptionPlanningSw--><g id="link_Perception_PerceptionPlanningSw"><path d="M492.34,685.5795 C509.68,708.0895 530.04,731.0995 552,749.2295 C569.38,763.5795 589.47,776.4295 609.71,787.5895 " fill="none" id="Perception-to-PerceptionPlanningSw" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="616.87,791.4695,611.2696,785.017,608.4077,790.2905,616.87,791.4695" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="75" x="553" y="730.0752">Sensing Data</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="27" x="577" y="746.5576">[IPC]</text></g><!--MD5=[c9f464c731a038c65e28be150737f99b]
+link PerceptionPlanningSw to Planning--><g id="link_PerceptionPlanningSw_Planning"><path d="M696,898.4095 C682.12,924.6695 665.5,956.1295 650.34,984.8195 " fill="none" id="PerceptionPlanningSw-to-Planning" style="stroke:#666666;stroke-width:1.0;"/><polygon fill="#666666" points="646.52,992.0495,652.9139,986.3823,647.611,983.5754,646.52,992.0495" style="stroke:#666666;stroke-width:1.0;"/><text fill="#666666" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacing" textLength="79" x="678" y="943.0752">Behavior Tree</text><text fill="#666666" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacing" textLength="27" x="704" y="959.5576">[IPC]</text></g><rect fill="none" height="150.6064" id="_legend" rx="7.5" ry="7.5" style="stroke:none;stroke-width:1.0;" width="133" x="901" y="1602.8359"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="53" x="907" y="1626.9893">Legend</text><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="4" x="960" y="1626.9893"> </text><rect fill="#08427B" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1630.0654"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="911" y="1646.2188">person</text><rect fill="#1168BD" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1649.2949"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="911" y="1665.4482">system</text><rect fill="#438DD5" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1668.5244"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59" x="911" y="1684.6777">container</text><rect fill="#686868" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1687.7539"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="911" y="1703.9072">external person</text><rect fill="#999999" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1706.9834"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="911" y="1723.1367">external system</text><rect fill="#B3B3B3" height="19.2295" style="stroke:none;stroke-width:1.0;" width="121" x="907" y="1726.2129"/><text fill="#FFFFFF" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113" x="911" y="1742.3662">external container</text><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1610.8359" y2="1610.8359"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1630.0654" y2="1630.0654"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1649.2949" y2="1649.2949"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1668.5244" y2="1668.5244"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1687.7539" y2="1687.7539"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1706.9834" y2="1706.9834"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1726.2129" y2="1726.2129"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="1028" y1="1745.4424" y2="1745.4424"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="907" x2="907" y1="1610.8359" y2="1745.4424"/><line style="stroke:#FFFFFF;stroke-width:1.0;" x1="1028" x2="1028" y1="1610.8359" y2="1745.4424"/><!--MD5=[9d8e0b166b0370cc1b4b4e2a1e890192]
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
-' uncomment the following line and comment the first to use locally
-' !include C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+'LAYOUT_AS_SKETCH()
+LAYOUT_TOP_DOWN()
+'LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title Automotive Common S/W Platform
+title Common S/W Platform
 
-Container(spa, "Single Page Application", "javascript and angular", "Provides all the internet banking functionality to customers via their web browser.")
-Container(ma, "Mobile App", "Xamarin", "Provides a limited subset ot the internet banking functionality to customers via their mobile mobile device.")
-ContainerDb(db, "Database", "Relational Database Schema", "Stores user registration information, hashed authentication credentials, access logs, etc.")
-System_Ext(mbs, "Mainframe Banking System", "Stores all of the core banking information about customers, accounts, transactions, etc.")
+Container(Sensing, "Sensing", "Node / Library", "LiDAR, Radar, Camera 등 다양한 센서로부터 데이터를 수집") 
+Container(Localization, "Localization", "Node / Library", "다양한 방법과 알고리즘으로 차량의 위치를 추정하기 위한 노드(구현체) 및 라이브러리를 제공함") 
+Container(Perception, "Perception", "Library", "센서 데이터 처리(인지)를 위한 노드 및 라이브러리로, 센서 데이터 전처리를 위한 필터링 및 대용량 데이터 압축등 전체 파이프라인을 담당함") 
+Container(Planning, "Planning", "Library", "주행 경로 및 궤적 최적화를 담당하며 복잡한 경로 최적화 문제를 단순화 시키기 위한 다양한 라이브러리를 제공함")
+Container(Control, "Control", "Node / Library", "차량의 제어를 위한 노드로, 종방향 및 횡방향에 대한 명령을 통해 차량 제어부와 직접적으로 통신함")
+Container(VehicleInterface, "Vehicle Interface", "Sensor/Actuator Drivers", "각종 센서 및 엑츄에이터와의 연동을 담당함")
 
-Container_Boundary(api, "API Application") {
-    Component(sign, "Sign In Controller", "MVC Rest Controlle", "Allows users to sign in to the internet banking system")
-    Component(accounts, "Accounts Summary Controller", "MVC Rest Controlle", "Provides customers with a summory of their bank accounts")
-    Component(security, "Security Component", "Spring Bean", "Provides functionality related to singing in, changing passwords, etc.")
-    Component(mbsfacade, "Mainframe Banking System Facade", "Spring Bean", "A facade onto the mainframe banking system.")
+System_Ext(PerceptionPlanningSw, "인지/판단 SW", "인지/판단 S/W로 이 과제 내에서는 와이즈오토모티브에서 담당")
+ 
+System_Ext(Middleware, "Middleware", "공통 S/W 플랫폼과 연계되어 컴퓨팅 H/W와 센서 등의 연결을 위한 HAL(Hardware Access Layer)과 내부 통신을 위한 DDS Broker로 구성됨")
+System_Ext(Vehicle, "Vehicle", "자율주행 차량 H/W") 
+System_Ext(Sensors, "Sensors", "Lidar, Camera, GPS etc.")
 
-    Rel(sign, security, "Uses")
-    Rel(accounts, mbsfacade, "Uses")
-    Rel(security, db, "Read & write to", "JDBC")
-    Rel(mbsfacade, mbs, "Uses", "XML/HTTPS")
-}
+Rel(Middleware, Sensing, "Socket", "DDS (Pub/Sub)")
+Rel(Sensors, Sensing, "Socket, Serial etc.")
+Rel(Sensing, Perception, "Sensing Data")
+Rel_Neighbor(Perception, Planning, "Surrounding Environment") 
+Rel_Neighbor(Planning, Control, "Trajectory")
+Rel(Control, VehicleInterface, "Vehicle Commands")
+Rel(VehicleInterface,Control, "Steering, Velocity Feedback")
+BiRel(VehicleInterface, Vehicle, "CAN, Socket, Serial")
+Rel(Sensing, Localization, "Current Position and Velocity") 
+Rel(Localization,Perception, "Current Position and velocity") 
+Rel(Localization,Planning, "Current Position and velocity") 
+Rel(Localization, Control, "Current Position and velocity")
+Rel(VehicleInterface, Localization, "VehicleSensor")
+Rel(PerceptionPlanningSw, Perception, "Semantic Segmentation", "IPC")
+Rel(Perception, PerceptionPlanningSw, "Sensing Data", "IPC")
+Rel(PerceptionPlanningSw, Planning, "Behavior Tree", "IPC")
 
-Rel(spa, sign, "Uses", "JSON/HTTPS")
-Rel(spa, accounts, "Uses", "JSON/HTTPS")
-
-Rel(ma, sign, "Uses", "JSON/HTTPS")
-Rel(ma, accounts, "Uses", "JSON/HTTPS")
 @enduml
 
 @startuml
@@ -1202,148 +1220,50 @@ skinparam rectangle<<container_boundary>>StereotypeFontColor transparent
 
 
 
-
-
-
-
-
-
-skinparam rectangle<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam database<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam queue<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam person<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam actor<<component>> {
-    StereotypeFontColor #85BBF0
-    FontColor #85BBF0
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam participant<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-skinparam sequencebox<<component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #85BBF0
-    BorderColor #78A8D8
-}
-
-
-skinparam rectangle<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam database<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam queue<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam person<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam actor<<external_component>> {
-    StereotypeFontColor #CCCCCC
-    FontColor #CCCCCC
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam participant<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-skinparam sequencebox<<external_component>> {
-    StereotypeFontColor #000000
-    FontColor #000000
-    BackgroundColor #CCCCCC
-    BorderColor #BFBFBF
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
+top to bottom direction
 hide stereotype
 legend right
 |<color:#000000>**Legend**</color> |
 |<#08427B> person |
 |<#1168BD> system |
 |<#438DD5> container |
-|<#85BBF0> component |
 |<#686868> external person |
 |<#999999> external system |
 |<#B3B3B3> external container |
-|<#CCCCCC> external component |
 endlegend
 
-title Automotive Common S/W Platform
+title Common S/W Platform
 
-  rectangle "== Single Page Application\n//<size:12>[javascript and angular]</size>//\n\nProvides all the internet banking functionality to customers via their web browser." <<container>> as spa
-  rectangle "== Mobile App\n//<size:12>[Xamarin]</size>//\n\nProvides a limited subset ot the internet banking functionality to customers via their mobile mobile device." <<container>> as ma
-  database "== Database\n//<size:12>[Relational Database Schema]</size>//\n\nStores user registration information, hashed authentication credentials, access logs, etc." <<container>> as db
-  rectangle "== Mainframe Banking System\n\nStores all of the core banking information about customers, accounts, transactions, etc." <<external_system>> as mbs
+  rectangle "== Sensing\n//<size:12>[Node / Library]</size>//\n\nLiDAR, Radar, Camera 등 다양한 센서로부터 데이터를 수집" <<container>> as Sensing 
+  rectangle "== Localization\n//<size:12>[Node / Library]</size>//\n\n다양한 방법과 알고리즘으로 차량의 위치를 추정하기 위한 노드(구현체) 및 라이브러리를 제공함" <<container>> as Localization 
+  rectangle "== Perception\n//<size:12>[Library]</size>//\n\n센서 데이터 처리(인지)를 위한 노드 및 라이브러리로, 센서 데이터 전처리를 위한 필터링 및 대용량 데이터 압축등 전체 파이프라인을 담당함" <<container>> as Perception 
+  rectangle "== Planning\n//<size:12>[Library]</size>//\n\n주행 경로 및 궤적 최적화를 담당하며 복잡한 경로 최적화 문제를 단순화 시키기 위한 다양한 라이브러리를 제공함" <<container>> as Planning
+  rectangle "== Control\n//<size:12>[Node / Library]</size>//\n\n차량의 제어를 위한 노드로, 종방향 및 횡방향에 대한 명령을 통해 차량 제어부와 직접적으로 통신함" <<container>> as Control
+  rectangle "== Vehicle Interface\n//<size:12>[Sensor/Actuator Drivers]</size>//\n\n각종 센서 및 엑츄에이터와의 연동을 담당함" <<container>> as VehicleInterface
 
-  rectangle "== API Application\n<size:12>[Container]</size>" <<container_boundary>><<boundary>> as api  {
-      rectangle "== Sign In Controller\n//<size:12>[MVC Rest Controlle]</size>//\n\nAllows users to sign in to the internet banking system" <<component>> as sign
-      rectangle "== Accounts Summary Controller\n//<size:12>[MVC Rest Controlle]</size>//\n\nProvides customers with a summory of their bank accounts" <<component>> as accounts
-      rectangle "== Security Component\n//<size:12>[Spring Bean]</size>//\n\nProvides functionality related to singing in, changing passwords, etc." <<component>> as security
-      rectangle "== Mainframe Banking System Facade\n//<size:12>[Spring Bean]</size>//\n\nA facade onto the mainframe banking system." <<component>> as mbsfacade
+  rectangle "== 인지/판단 SW\n\n인지/판단 S/W로 이 과제 내에서는 와이즈오토모티브에서 담당" <<external_system>> as PerceptionPlanningSw
+ 
+  rectangle "== Middleware\n\n공통 S/W 플랫폼과 연계되어 컴퓨팅 H/W와 센서 등의 연결을 위한 HAL(Hardware Access Layer)과 내부 통신을 위한 DDS Broker로 구성됨" <<external_system>> as Middleware
+  rectangle "== Vehicle\n\n자율주행 차량 H/W" <<external_system>> as Vehicle 
+  rectangle "== Sensors\n\nLidar, Camera, GPS etc." <<external_system>> as Sensors
 
-    sign - ->> security : **Uses**
-    accounts - ->> mbsfacade : **Uses**
-    security - ->> db : **Read & write to**\n//<size:12>[JDBC]</size>//
-    mbsfacade - ->> mbs : **Uses**\n//<size:12>[XML/HTTPS]</size>//
-}
+Middleware - ->> Sensing : **Socket**\n//<size:12>[DDS (Pub/Sub)]</size>//
+Sensors - ->> Sensing : **Socket, Serial etc.**
+Sensing - ->> Perception : **Sensing Data**
+Perception ->> Planning : **Surrounding Environment** 
+Planning ->> Control : **Trajectory**
+Control - ->> VehicleInterface : **Vehicle Commands**
+VehicleInterface - ->> Control : **Steering, Velocity Feedback**
+VehicleInterface <<- ->> Vehicle : **CAN, Socket, Serial**
+Sensing - ->> Localization : **Current Position and Velocity** 
+Localization - ->> Perception : **Current Position and velocity** 
+Localization - ->> Planning : **Current Position and velocity** 
+Localization - ->> Control : **Current Position and velocity**
+VehicleInterface - ->> Localization : **VehicleSensor**
+PerceptionPlanningSw - ->> Perception : **Semantic Segmentation**\n//<size:12>[IPC]</size>//
+Perception - ->> PerceptionPlanningSw : **Sensing Data**\n//<size:12>[IPC]</size>//
+PerceptionPlanningSw - ->> Planning : **Behavior Tree**\n//<size:12>[IPC]</size>//
 
-spa - ->> sign : **Uses**\n//<size:12>[JSON/HTTPS]</size>//
-spa - ->> accounts : **Uses**\n//<size:12>[JSON/HTTPS]</size>//
-
-ma - ->> sign : **Uses**\n//<size:12>[JSON/HTTPS]</size>//
-ma - ->> accounts : **Uses**\n//<size:12>[JSON/HTTPS]</size>//
 @enduml
 
 PlantUML version 1.2022.7(Tue Aug 23 02:01:30 KST 2022)

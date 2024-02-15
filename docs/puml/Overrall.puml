@@ -1,0 +1,30 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+' LAYOUT_AS_SKETCH()
+LAYOUT_TOP_DOWN()
+'LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
+
+title Overrall Architecture
+
+Person(Integrator, "Integrator", "자율주행 차량 개발자")
+System(Platform, "Common S/W Platform", "인공지능 기반 차량용 S/W를 구동시키기 위한 플랫폼으로 유저 어플리케이션 관리 및 개발용 라이브러리를 포함함")
+System(Middleware, "Middleware", "공통 S/W 플랫폼과 연계되어 컴퓨팅 H/W와 센서 등의 연결을 위한 HAL(Hardware Access Layer)과 내부 통신을 위한 DDS Broker로 구성됨")
+System(Edge, "Edge Computing H/W", "차량에 탑재되어 컴퓨팅을 담당하는 H/W이며 AI 가속기능을 갖춤")
+System_Ext(Ros2, "ROS2", "기존 자율주행 차량 개발에 주로 사용되던 ROS2에 대한 호환성 확보")
+System_Ext(Autosar, "AUTOSAR\n(Adaptive Platform)", "차량 S/W 표준 아키텍쳐 기반 플랫폼")
+System_Ext(Vehicle, "Vehicle", "자율주행 차량 H/W")
+System_Ext(Robot, "Robot", "로봇 H/W")
+
+Rel(Integrator, Platform, "Utilizes", "SDK: Software deveolopment kit")
+Rel(Platform, Ros2, "Uses", "ROS2 Compatibility support")
+Rel(Platform, Middleware, "Include")
+Rel(Middleware, Autosar, "Based on")
+Rel(Middleware, Edge, "Deploy")
+Rel(Ros2, Edge, "Deploy")
+Rel(Edge, Vehicle, "Mounted on")
+Rel(Edge, Robot, "Mounted on")
+Rel(Ros2, Robot, "Deploy")
+
+@enduml

@@ -1,32 +1,41 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
-' uncomment the following line and comment the first to use locally
-' !include C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+'LAYOUT_AS_SKETCH()
+LAYOUT_TOP_DOWN()
+'LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title Automotive Common S/W Platform
+title Common S/W Platform
 
-Container(spa, "Single Page Application", "javascript and angular", "Provides all the internet banking functionality to customers via their web browser.")
-Container(ma, "Mobile App", "Xamarin", "Provides a limited subset ot the internet banking functionality to customers via their mobile mobile device.")
-ContainerDb(db, "Database", "Relational Database Schema", "Stores user registration information, hashed authentication credentials, access logs, etc.")
-System_Ext(mbs, "Mainframe Banking System", "Stores all of the core banking information about customers, accounts, transactions, etc.")
+Container(Sensing, "Sensing", "Node / Library", "LiDAR, Radar, Camera 등 다양한 센서로부터 데이터를 수집") 
+Container(Localization, "Localization", "Node / Library", "다양한 방법과 알고리즘으로 차량의 위치를 추정하기 위한 노드(구현체) 및 라이브러리를 제공함") 
+Container(Perception, "Perception", "Library", "센서 데이터 처리(인지)를 위한 노드 및 라이브러리로, 센서 데이터 전처리를 위한 필터링 및 대용량 데이터 압축등 전체 파이프라인을 담당함") 
+Container(Planning, "Planning", "Library", "주행 경로 및 궤적 최적화를 담당하며 복잡한 경로 최적화 문제를 단순화 시키기 위한 다양한 라이브러리를 제공함")
+Container(Control, "Control", "Node / Library", "차량의 제어를 위한 노드로, 종방향 및 횡방향에 대한 명령을 통해 차량 제어부와 직접적으로 통신함")
+Container(VehicleInterface, "Vehicle Interface", "Sensor/Actuator Drivers", "각종 센서 및 엑츄에이터와의 연동을 담당함")
 
-Container_Boundary(api, "API Application") {
-    Component(sign, "Sign In Controller", "MVC Rest Controlle", "Allows users to sign in to the internet banking system")
-    Component(accounts, "Accounts Summary Controller", "MVC Rest Controlle", "Provides customers with a summory of their bank accounts")
-    Component(security, "Security Component", "Spring Bean", "Provides functionality related to singing in, changing passwords, etc.")
-    Component(mbsfacade, "Mainframe Banking System Facade", "Spring Bean", "A facade onto the mainframe banking system.")
+System_Ext(PerceptionPlanningSw, "인지/판단 SW", "인지/판단 S/W로 이 과제 내에서는 와이즈오토모티브에서 담당")
+ 
+System_Ext(Middleware, "Middleware", "공통 S/W 플랫폼과 연계되어 컴퓨팅 H/W와 센서 등의 연결을 위한 HAL(Hardware Access Layer)과 내부 통신을 위한 DDS Broker로 구성됨")
+System_Ext(Vehicle, "Vehicle", "자율주행 차량 H/W") 
+System_Ext(Sensors, "Sensors", "Lidar, Camera, GPS etc.")
 
-    Rel(sign, security, "Uses")
-    Rel(accounts, mbsfacade, "Uses")
-    Rel(security, db, "Read & write to", "JDBC")
-    Rel(mbsfacade, mbs, "Uses", "XML/HTTPS")
-}
+Rel(Middleware, Sensing, "Socket", "DDS (Pub/Sub)")
+Rel(Sensors, Sensing, "Socket, Serial etc.")
+Rel(Sensing, Perception, "Sensing Data")
+Rel_Neighbor(Perception, Planning, "Surrounding Environment") 
+Rel_Neighbor(Planning, Control, "Trajectory")
+Rel(Control, VehicleInterface, "Vehicle Commands")
+Rel(VehicleInterface,Control, "Steering, Velocity Feedback")
+BiRel(VehicleInterface, Vehicle, "CAN, Socket, Serial")
+Rel(Sensing, Localization, "Current Position and Velocity") 
+Rel(Localization,Perception, "Current Position and velocity") 
+Rel(Localization,Planning, "Current Position and velocity") 
+Rel(Localization, Control, "Current Position and velocity")
+Rel(VehicleInterface, Localization, "VehicleSensor")
+Rel(PerceptionPlanningSw, Perception, "Semantic Segmentation", "IPC")
+Rel(Perception, PerceptionPlanningSw, "Sensing Data", "IPC")
+Rel(PerceptionPlanningSw, Planning, "Behavior Tree", "IPC")
 
-Rel(spa, sign, "Uses", "JSON/HTTPS")
-Rel(spa, accounts, "Uses", "JSON/HTTPS")
-
-Rel(ma, sign, "Uses", "JSON/HTTPS")
-Rel(ma, accounts, "Uses", "JSON/HTTPS")
 @enduml

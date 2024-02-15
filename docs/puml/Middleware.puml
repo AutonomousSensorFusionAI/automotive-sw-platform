@@ -1,0 +1,36 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+'LAYOUT_AS_SKETCH()
+LAYOUT_TOP_DOWN()
+'LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
+
+title Middleware
+
+System_Ext(Autosar, "AUTOSAR\n(Adaptive Platform)", "차량 S/W 표준 아키텍쳐 기반 플랫폼")
+Container_Ext(AraComm, "AUTOSAR Runtime\n(ara::comm)", "Node", "SOME/IP, etc")
+
+Container(DDS, "DDS", "Node", "Data Distribution Service")
+Container(TimeSynchronization, "Time Synchronization", "Node", "데이터 시각 동기화를 담당")
+Container(Diagnostics, "Diagnostics", "Node", "미들웨어 동작 상태 진단을 담당")
+Container(NetworkManager, "Network Manager", "Node", "저수준 통신 제어를 담당")
+Container(CommunicationManagement, "Communication Management", "Node", "고급 통신을 담당")
+Container(CanInterface, "CAN Interface", "Driver", "CAN 통신 담당")
+Container(SocketInterface, "Socket Interface", "Driver", "Socket 통신 담당")
+
+Rel_Neighbor(TimeSynchronization, CommunicationManagement, "Scheduling")
+
+BiRel_Neighbor(Diagnostics, CommunicationManagement, "Detect")
+BiRel_Neighbor(Diagnostics, NetworkManager, "Detect")
+BiRel_Neighbor(Diagnostics, TimeSynchronization, "Detect")
+
+BiRel(DDS, CommunicationManagement, "Interface", "DDS")
+BiRel(CommunicationManagement, NetworkManager, "Interface", "DDS")
+Rel(NetworkManager, CanInterface, "Uses", "File Descriptor")
+Rel(NetworkManager, SocketInterface, "Uses", "File Descriptor")
+Rel(NetworkManager, AraComm, "Uses", "Library")
+
+Rel(Autosar, AraComm, "Implementation")
+
+@enduml
