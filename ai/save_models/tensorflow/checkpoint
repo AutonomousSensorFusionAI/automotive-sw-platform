@@ -1,0 +1,2 @@
+model_checkpoint_path: "tensorflow_mnist_resnet18"
+all_model_checkpoint_paths: "tensorflow_mnist_resnet18"
