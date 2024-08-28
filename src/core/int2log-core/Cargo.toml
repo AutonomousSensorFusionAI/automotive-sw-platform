@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["full"] }
+derivative = {version = "2.2.0"}
+
+# [lib]
+# name = "int2log_core"
+# path = "src/lib.rs"
