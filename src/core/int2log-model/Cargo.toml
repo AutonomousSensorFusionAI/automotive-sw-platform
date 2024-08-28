@@ -2,5 +2,12 @@
 name = "int2log-model"
 version = "0.1.0"
 edition = "2021"
+build = "src/build.rs"
 
 [dependencies]
+capnp  = "0.19.6"
+int2log-core = { path = "../int2log-core" }
+tokio = { version = "1", features = ["full"] }
+
+[build-dependencies]
+capnpc = "0.19.0"
