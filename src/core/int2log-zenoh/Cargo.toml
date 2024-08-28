@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+zenoh = { version = "1.0.0-alpha.5" }
+tokio = { version = "1", features = ["full"] }
+int2log-core = { path = "../int2log-core" }
+flume = { version = "0.11.0"}
+futures = { version = "0.3.30" }
