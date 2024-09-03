@@ -1,4 +1,4 @@
-use int2log_core::*;
+use int2log_common::*;
 use capnp::message::Builder;
 use capnp::serialize;
 pub mod log_message_capnp;
@@ -87,22 +87,8 @@ impl Serialization<Vec<u8>> for CapnpSerializer{
 #[cfg(test)]
 mod tests {
     use super::*;
-	use int2log_core::*;
 
     #[tokio::test]
     async fn it_works() {
-		let mut log = Log::log().serializer(CapnpSerializer).middleware(DefaultMiddleware);
-		log.debug(String::from(format!("Default Setting: {:?}", log))).await;
-		log.set_publish_level(LogLevel::Warn);
-		log.debug(String::from(format!("Change Pub log level: {:?}", log))).await;
-		log.set_print_level(LogLevel::Debug);
-		log.debug(String::from(format!("Change Print log level: {:?}", log))).await;
-		
-		log.trace(String::from("This is Trace!")).await;
-		log.debug(String::from("This is Debug!")).await;
-		log.info(String::from("This is Info!")).await;
-		log.warn(String::from("This is Warn!")).await;
-		log.error(String::from("This is Error!")).await;
-		log.debug(String::from(format!("log: {:?}", log))).await;
     }
 }
