@@ -122,6 +122,10 @@ impl<'a> ZenohMiddleware<'a> {
             subscriber,
         }
     }
+
+    pub async fn default() -> Self{
+        ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap()
+    }
 }
 
 impl<'a> Communication<String> for ZenohMiddleware<'a>{
@@ -169,23 +173,6 @@ impl<'a> ZenohMiddleware<'a> {
     }
 }
 
-use futures::executor::block_on;
-impl<'a> Default for ZenohMiddleware<'a> {
-    fn default() -> Self {
-        let rt = Runtime::new().unwrap();
-        // rt.block_on(async {
-        // block_on(async{
-        //     ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap()
-        // })
-        // ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap()
-        tokio::task::block_in_place(|| {
-            futures::executor::block_on(async {
-                ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap()
-            })
-        })
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use zenoh::config::default;
@@ -195,20 +182,23 @@ mod tests {
     // #[tokio::test]
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn it_works() {
-        let middleware_default = ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap();
-        // println!("{:?}", middleware_default);
+        // let middleware_default = ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap();
+        // // println!("{:?}", middleware_default);
 
-        let zenoh_config = ZenohConfiguration{
-            config: default(),
-            pub_key: Some(String::from("topic/test")),
-            sub_key: Some(String::from("topic/test")),
-        };
-        let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).await.unwrap().build().await.unwrap();
+        // let zenoh_config = ZenohConfiguration{
+        //     config: default(),
+        //     pub_key: Some(String::from("topic/test")),
+        //     sub_key: Some(String::from("topic/test")),
+        // };
+        // let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
+        let middleware = ZenohMiddleware::default().await;
         let payload_1 = String::from("Hi! It's me!");
         let payload_2: String = String::from("Hi! It's me!!");
         middleware.sender(payload_1).await;
         middleware.receiver().await;
         middleware.sender(payload_2).await;
         middleware.receiver().await;
+        // let config = load_config_from_file("zenoh.json5");
+        // println!("{:?}", config);
     }
 }
