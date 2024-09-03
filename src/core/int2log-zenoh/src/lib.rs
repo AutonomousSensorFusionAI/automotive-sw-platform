@@ -9,34 +9,54 @@ use flume::Receiver;
 
 use tokio::runtime::Runtime;
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct ZenohConfiguration {
     pub config: zenoh::Config,
     pub pub_key: Option<String>,
     pub sub_key: Option<String>,
 }
+use std::path::PathBuf;
+impl ZenohConfiguration {
+    fn load_config_from_file(file_path: &str) -> zenoh::Config {
+        let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        config_path.push(file_path);
+        let config = zenoh::Config::from_file(config_path).expect("Failed to load configuration file");
+        config
+    }
+}
+
+impl Default for ZenohConfiguration {
+    fn default() -> Self {
+        ZenohConfiguration {
+            config: ZenohConfiguration::load_config_from_file("zenoh.json5"),
+            pub_key: Some(String::from("log")),
+            sub_key: None,
+            // sub_key: Some(String::from("log")),
+        }
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct ZenohMiddlewareBuilder<'a> {
-    config: Option<ZenohConfiguration>,
+    config: ZenohConfiguration,
     session: Option<&'a zenoh::Session>,
     publisher: Option<zenoh::pubsub::Publisher<'a>>,
     subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>,
 }
 
 impl<'a> ZenohMiddlewareBuilder<'a> {
-    pub async fn config(mut self, config: ZenohConfiguration) -> Result<Self, zenoh::Error>{
-        self.config = Some(config.clone());
+    pub async fn config(mut self) -> Result<Self, zenoh::Error> {// -> Result<Self, zenoh::Error>{
+        // self.config = Some(config.clone());
         
-        let session = zenoh::open(config.config.clone()).await.unwrap();
-        let session_ref = Box::leak(Box::new(session));
+        let session = zenoh::open(self.config.config.clone()).await.unwrap();
+        let session_ref = Box::leak(Box::new(session)); // 힙에 메모리를 할당해야 하지만, 프로그램이 끝날 때까지 해당 메모리를 해제할 필요가 없는 상황을 위한 것
 
-        if let Some(pub_key) = config.pub_key.clone() {
+        if let Some(pub_key) = self.config.pub_key.clone() {
             let publisher: zenoh::pubsub::Publisher = session_ref.declare_publisher(pub_key).await.unwrap();
             self = self.publisher(publisher);
         }
 
-        if let Some(sub_key) = config.sub_key.clone() {
+        if let Some(sub_key) = self.config.sub_key.clone() {
             let subscriber = session_ref.declare_subscriber(sub_key).await.unwrap();
             self = self.subscriber(subscriber);
         }
@@ -71,7 +91,7 @@ impl<'a> ZenohMiddlewareBuilder<'a> {
         match self.session {
             Some(session) => Ok(ZenohMiddleware::new(
                 self.config,
-                session,
+                self.session,
                 self.publisher,
                 self.subscriber,
             ).await),
@@ -80,25 +100,21 @@ impl<'a> ZenohMiddlewareBuilder<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ZenohMiddleware<'a> {
     pub config: ZenohConfiguration,
-    pub session: &'a zenoh::Session,
+    pub session: Option<&'a zenoh::Session>,
     pub publisher: Option<zenoh::pubsub::Publisher<'a>>,
     pub subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>,
 }
 
 impl<'a> ZenohMiddleware<'a> {
     pub async fn new(
-        config: Option<ZenohConfiguration>, 
-        session: &'a zenoh::Session, 
+        config: ZenohConfiguration, 
+        session: Option<&'a zenoh::Session>,
         publisher: Option<zenoh::pubsub::Publisher<'a>>, 
         subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>)
          -> Self {
-        let config = match config {
-            Some(config) => config,
-            None => ZenohConfiguration{..Default::default()},
-        };
         ZenohMiddleware {
             config,
             session,
