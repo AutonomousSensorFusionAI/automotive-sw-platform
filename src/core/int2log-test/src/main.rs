@@ -1,4 +1,5 @@
 use int2log_core::*;
+use int2log_common::*;
 use int2log_model::*;
 use int2log_zenoh::*;
 
@@ -6,21 +7,15 @@ use int2log_zenoh::*;
 #[tokio::main(flavor = "multi_thread", worker_threads = 1)]
 async fn main() {
 	/* Log version 1) 
-	 Log + Capnp + Zenoh => 에러로 인해 동작하지 않는 로그 (테스트는 작동 O) */
-	// let zenoh_config = ZenohConfiguration{
-	// 	config: Default::default(),
-	// 	pub_key: Some(String::from("topic/test")),
-	// 	sub_key: None,
-	// };
-	// let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).await.unwrap().build().await.unwrap();
-	// let mut log: Log<Vec<u8>, CapnpSerializer, ZenohMiddleware> = Log::log().serializer(CapnpSerializer).middleware(middleware);
-	
+	 Log + Capnp + Zenoh  */
+	// let mut log = Log::default().await;
+	let mut log = Log::default().await;
 	/* Log version 2) 
 	 Log + DefaultSerializer(Data to String or Vec<u8>, not Capnp) + DefaultMiddleware(Send, Receive - X) */
-	// let mut log: Log<String, DefaultSerializer, DefaultMiddleware> = Log::default();
+	// let mut log: Log<String, DefaultSerializer, DefaultMiddleware> = Log::log().middleware(DefaultMiddleware).serializer(DefaultSerializer);
 
 	// Log version 3) Log + Capnp + DefaultMiddleware(Send, Receive - X)
-	let mut log: Log<Vec<u8>, CapnpSerializer, DefaultMiddleware> = Log::log().serializer(CapnpSerializer).middleware(DefaultMiddleware);
+	// let mut log: Log<Vec<u8>, CapnpSerializer, DefaultMiddleware> = Log::log().serializer(CapnpSerializer).middleware(DefaultMiddleware);
 	
 	log.debug(String::from(format!("Default Setting: {:?}", log))).await;
 	log.set_publish_level(LogLevel::Warn);
