@@ -1,4 +1,4 @@
-use int2log_core::*;
+use int2log_common::*;
 use zenoh::handlers::DefaultHandler;
 use std::future::Future;
 
