@@ -89,15 +89,16 @@ impl Communication<Vec<u8>> for DefaultMiddleware {
 	}
 }
 
-impl Log <String, DefaultSerializer, DefaultMiddleware>
+
+impl<'a> Log <Vec<u8>, CapnpSerializer, ZenohMiddleware<'a>>
 where 
-	DefaultSerializer: Serialization<String> + Default,
-	DefaultMiddleware: Communication<String> + Default,
+	CapnpSerializer: Serialization<Vec<u8>> + Default,
+	ZenohMiddleware<'a>: Communication<Vec<u8>>,
 {
     #[no_mangle]
-	pub fn default() -> Self {
-    // pub extern fn default() -> *mut Log<String, DefaultSerializer, DefaultMiddleware> {
-		Log::log()
+	pub async fn default() -> Self {
+		let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
+		Log::log().serializer(CapnpSerializer).middleware(middleware)
 	}
 }
 
@@ -107,15 +108,10 @@ where
 	Middleware: Communication<T> + Default,
 {
 	pub fn log() -> Self {
-		// pub extern fn log() -> *mut Log<T, Serializer, Middleware> {
 		Log { print: true, publish: true, .. Default::default() }
-		// let log = Log { print: true, publish: true, .. Default::default() };
-		// Box::into_raw(Box::new(log)) // 힙에 할당하고 포인터를 반환
 	}
 
-	pub fn serializer(self, serializer: Serializer) -> Log<T, Serializer, Middleware> {
-        // self.serializer = serializer;
-        // self
+	pub fn serializer(mut self, serializer: Serializer) -> Log<T, Serializer, Middleware> {
 		Log {
 			log_message: self.log_message,
             publish: self.publish,
@@ -126,11 +122,11 @@ where
 			middleware: self.middleware,
 			_phantom: Default::default(),
 		}
+		// self.serializer = serializer;
+		// self
     }
 
-    pub fn middleware(self, middleware: Middleware) -> Log<T, Serializer, Middleware> {
-        // self.middleware = middleware;
-        // self
+    pub fn middleware(mut self, middleware: Middleware) -> Log<T, Serializer, Middleware> {
 		Log {
 			log_message: self.log_message,
             publish: self.publish,
@@ -170,15 +166,10 @@ where
 	}
 
     pub async fn process_log(&mut self) {
-	// pub fn process_log(&mut self) {
-        // let rt = Runtime::new().unwrap();
 		if self.publish == true {
 			if (self.publish_level) <= (self.log_message.log_level) {
 				let data: T = self.serializer.serialize_msg(&self.log_message);
 				self.middleware.sender(data).await;
-                // rt.block_on(async {
-                //     self.middleware.sender(data).await;
-                // })
 			}
 		}
 
@@ -203,7 +194,6 @@ where
     }
 
     pub async fn trace(&mut self, message: String) {
-	// pub fn trace(&mut self, message: String) {
 		let log_message: LogMessage = LogMessage {
 			log_level: LogLevel::Trace,
 			msg: message,
@@ -211,11 +201,9 @@ where
 		};
 		self.log_message = log_message;
 		self.process_log().await;
-        // self.process_log();
 	}
 
     pub async fn debug(&mut self, message: String) {
-	// pub fn debug(&mut self, message: String) {
 		let log_message: LogMessage = LogMessage {
 			log_level: LogLevel::Debug,
 			msg: message,
@@ -223,12 +211,10 @@ where
 		};
 		self.log_message = log_message;
 		self.process_log().await;
-        // self.process_log();
 	}
 
 
     pub async fn info(&mut self, message: String) {
-	// pub fn info(&mut self, message: String) {
 		let log_message: LogMessage = LogMessage {
 			log_level: LogLevel::Info,
 			msg: message,
@@ -236,11 +222,9 @@ where
 		};
 		self.log_message = log_message;
 		self.process_log().await;
-        // self.process_log();
 	}
 
     pub async fn warn(&mut self, message: String) {
-	// pub fn warn(&mut self, message: String) {
 		let log_message: LogMessage = LogMessage {
 			log_level: LogLevel::Warn,
 			msg: message,
@@ -248,11 +232,9 @@ where
 		};
 		self.log_message = log_message;
 		self.process_log().await;
-        // self.process_log();
 	}
 
     pub async fn error(&mut self, message: String) {
-	// pub fn error(&mut self, message: String) {
 		let log_message: LogMessage = LogMessage {
 			log_level: LogLevel::Error,
 			msg: message,
@@ -260,7 +242,6 @@ where
 		};
 		self.log_message = log_message;
 		self.process_log().await;
-        // self.process_log();
 	}
 }
 
@@ -268,9 +249,9 @@ where
 mod tests {
     use super::*;
 
-    #[tokio::test]
+	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn it_works() {
-        let mut log = Log::default();
+		let mut log: Log<Vec<u8>, CapnpSerializer, ZenohMiddleware<'_>> = Log::default().await;
 		log.debug(String::from(format!("Default Setting: {:?}", log))).await;
 		log.set_publish_level(LogLevel::Warn);
 		log.debug(String::from(format!("Change Pub log level: {:?}", log))).await;
