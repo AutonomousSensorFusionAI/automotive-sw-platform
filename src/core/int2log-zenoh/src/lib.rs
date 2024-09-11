@@ -1,4 +1,4 @@
-use int2log_common::*;
+use int2log_model::*;
 use zenoh::handlers::DefaultHandler;
 use std::future::Future;
 
@@ -140,7 +140,7 @@ impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
     async fn sender(&self, data: Vec<u8>) {
     // fn sender(&self, data: Vec<u8>) -> impl Future<Output = ()> {
         if let Some(publisher) = &self.publisher {
-            publisher.put(data).await.unwrap();
+            publisher.put(&data).await.unwrap();
         }
     }
 }
