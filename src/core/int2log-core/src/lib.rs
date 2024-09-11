@@ -3,6 +3,7 @@ use derivative::Derivative;
 use std::marker::PhantomData;
 use std::future::Future;
 use std::rc::Rc;
+use std::cell::RefCell;
 use tokio::runtime::Runtime;
 
 use int2log_model::*;
@@ -20,9 +21,9 @@ pub trait ILogging: Debug {
 	fn set_false(&mut self);
 	fn process(&self, log_level: LogLevel, msg: &str);
 }
-pub trait ILogger<'a> {
-	fn attach(&mut self, logger: &'a dyn ILogging);
-	fn detach(&mut self, logger: &'a dyn ILogging);
+pub trait ILogger {
+	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
+	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn trace(&self, msg: &str);
 	fn debug(&self, msg: &str);
 	fn info(&self, msg: &str);
@@ -31,50 +32,55 @@ pub trait ILogger<'a> {
 }
 
 #[derive(Debug)]
-struct Logger<'a> {
-	loggers: Vec<&'a dyn ILogging>,
+struct Logger {
+	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
 }
 
-impl<'a> Logger<'a> {
-	fn new() -> Logger<'a> {
+impl Logger {
+	fn new() -> Logger {
 		Logger {
 			loggers: Vec::new(),
 		}
 	}
 }
 
-impl<'a> ILogger<'a> for Logger<'a> {
-	fn attach(&mut self, logger: &'a dyn ILogging) {
+impl ILogger for Logger {
+	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.push(logger);
 	}
-	// fn detach(&mut self, logger: *const dyn ILogging) {
-	fn detach(&mut self, logger: &'a dyn ILogging) {
-		let logger_ptr = logger as *const dyn ILogging;
-		self.loggers.retain(|l| !std::ptr::eq(&**l as *const dyn ILogging, logger_ptr));
+	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
+		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
+		// let logger_ptr = Rc::as_ptr(&logger) as *const dyn ILogging;
+		// self.loggers.retain(|l| Rc::as_ptr(l) as *const dyn ILogging != logger_ptr);
 	}
 	fn trace(&self, msg: &str) {
 		for item in self.loggers.iter() {
-			item.process(LogLevel::Trace, msg);
+			let logger_ref = item.borrow();
+			logger_ref.process(LogLevel::Trace, msg);
 		}
 	}
 	fn debug(&self, msg: &str) {
 		for item in self.loggers.iter() {
-			item.process(LogLevel::Debug, msg);
+			let logger_ref = item.borrow();
+			logger_ref.process(LogLevel::Debug, msg);
 		}
 	}
 	fn info(&self, msg: &str) {
 		for item in self.loggers.iter() {
-			item.process(LogLevel::Info, msg);
+			let logger_ref = item.borrow();
+			logger_ref.process(LogLevel::Info, msg);
 		}
 	}
 	fn warn(&self, msg: &str) {
 		for item in self.loggers.iter() {
-			item.process(LogLevel::Warn, msg);
+			let logger_ref = item.borrow();
+			logger_ref.process(LogLevel::Warn, msg);
 		}
 	}
 	fn error(&self, msg: &str) {
 		for item in self.loggers.iter() {
-			item.process(LogLevel::Error, msg);
+			let logger_ref = item.borrow();
+			logger_ref.process(LogLevel::Error, msg);
 		}
 	}
 }
@@ -294,22 +300,21 @@ mod tests {
 	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 	async fn logger_works() {
 		let mut logger = Logger::new();
-		let mut console_logger_a = ConsoleLogger::default();
-		let mut console_logger_b = ConsoleLogger {
+		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
+		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
 			activity: false,
 			..Default::default()
-		};
+		}));
+		console_logger_b.borrow_mut().set_log_level("error");
 
-		logger.attach(&console_logger_a);
-		logger.attach(&mut console_logger_b);
+		logger.attach(console_logger_a.clone());
+		logger.attach(console_logger_b.clone());
 		println!("{:?}", logger);
 
-		// Detach using the raw pointer to the logger
-		logger.detach(&console_logger_a);
+		logger.detach(console_logger_a.clone());
 		println!("{:?}", logger);
-		logger.attach(&console_logger_a);
-		// console_logger_b.set_true();
+		logger.attach(console_logger_a.clone());
+		console_logger_b.borrow_mut().set_true();
 		println!("{:?}", logger);
-		logger.error("hi?");
 	}
 }
