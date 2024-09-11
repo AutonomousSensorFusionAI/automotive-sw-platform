@@ -6,8 +6,7 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 int2log-core = { path = "../int2log-core" }
-int2log-common = { path = "../int2log-common" }
 int2log-model ={ path = "../int2log-model" }
 int2log-zenoh ={ path = "../int2log-zenoh" }
-zenoh = { version = "1.0.0-alpha.5" }
+zenoh = { version = "1.0.0-beta.1" }
 
