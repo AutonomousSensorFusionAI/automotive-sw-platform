@@ -4,6 +4,7 @@ struct LogMessage {
   logLevel @0 :LogLevel; # _ x -> use camelCase
   msg @1 :Text;
   timestamp @2 :Text;
+  logger @3 :Text;
   
   enum LogLevel {
     trace @0;
