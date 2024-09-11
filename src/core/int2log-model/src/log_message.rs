@@ -13,25 +13,37 @@ pub struct LogMessage {
 }
 
 impl LogMessage {
+    pub fn make_msg(log_level: super::log_level::LogLevel, msg: String) -> Self {
+        LogMessage {
+            log_level,
+            msg,
+            timestamp: Self::get_timestamp(),
+            logger: match Self::caller_name() {
+                Some(file) => file,
+                None => "Unknown".to_string(),
+            }
+        }
+    }
+
     pub fn msg(&mut self, log_level: super::log_level::LogLevel, msg: String) -> &mut Self{
         self.log_level = log_level;
         self.msg = msg;
-        self.timestamp = self.get_timestamp();
-        self.logger = match self.caller_name() {
+        self.timestamp = Self::get_timestamp();
+        self.logger = match Self::caller_name() {
             Some(file) => file,
             None => "Unknown".to_string(),
         };
         self
     }
 
-    fn get_timestamp(&self) -> String {
+    fn get_timestamp() -> String {
         let now: chrono::DateTime<Utc> = Utc::now();
         let now_format: String = now.format("%Y/%m/%d %T").to_string();
         now_format
     }
 
     #[inline(never)]
-    fn caller_name(&self) -> Option<String> {
+    fn caller_name() -> Option<String> {
         let backtrace = Backtrace::new();
         let symbol = backtrace
             .frames()
