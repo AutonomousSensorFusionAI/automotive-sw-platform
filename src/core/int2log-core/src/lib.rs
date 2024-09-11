@@ -2,18 +2,151 @@ use chrono::offset::Utc;
 use derivative::Derivative;
 use std::marker::PhantomData;
 use std::future::Future;
+use std::rc::Rc;
 use tokio::runtime::Runtime;
+
 use int2log_model::*;
+use int2log_model::log_level::*;
+use int2log_model::log_message::*;
+use int2log_model::serializer::*;
 use int2log_zenoh::*;
-use int2log_common::*;
+
+use std::fmt::Debug;
+use std::ptr;
+
+pub trait ILogging: Debug {
+	fn set_log_level(&mut self, log_level: &str);
+	fn set_true(&mut self);
+	fn set_false(&mut self);
+	fn process(&self, log_level: LogLevel, msg: &str);
+}
+pub trait ILogger<'a> {
+	fn attach(&mut self, logger: &'a dyn ILogging);
+	fn detach(&mut self, logger: &'a dyn ILogging);
+	fn trace(&self, msg: &str);
+	fn debug(&self, msg: &str);
+	fn info(&self, msg: &str);
+	fn warn(&self, msg: &str);
+	fn error(&self, msg: &str);
+}
+
+#[derive(Debug)]
+struct Logger<'a> {
+	loggers: Vec<&'a dyn ILogging>,
+}
+
+impl<'a> Logger<'a> {
+	fn new() -> Logger<'a> {
+		Logger {
+			loggers: Vec::new(),
+		}
+	}
+}
+
+impl<'a> ILogger<'a> for Logger<'a> {
+	fn attach(&mut self, logger: &'a dyn ILogging) {
+		self.loggers.push(logger);
+	}
+	// fn detach(&mut self, logger: *const dyn ILogging) {
+	fn detach(&mut self, logger: &'a dyn ILogging) {
+		let logger_ptr = logger as *const dyn ILogging;
+		self.loggers.retain(|l| !std::ptr::eq(&**l as *const dyn ILogging, logger_ptr));
+	}
+	fn trace(&self, msg: &str) {
+		for item in self.loggers.iter() {
+			item.process(LogLevel::Trace, msg);
+		}
+	}
+	fn debug(&self, msg: &str) {
+		for item in self.loggers.iter() {
+			item.process(LogLevel::Debug, msg);
+		}
+	}
+	fn info(&self, msg: &str) {
+		for item in self.loggers.iter() {
+			item.process(LogLevel::Info, msg);
+		}
+	}
+	fn warn(&self, msg: &str) {
+		for item in self.loggers.iter() {
+			item.process(LogLevel::Warn, msg);
+		}
+	}
+	fn error(&self, msg: &str) {
+		for item in self.loggers.iter() {
+			item.process(LogLevel::Error, msg);
+		}
+	}
+}
+
+#[derive(Derivative)]
+#[derivative(Default, Debug)]
+pub struct ConsoleLogger {
+	log_level: LogLevel,
+	#[derivative(Default(value="true"))]
+	activity: bool,
+}
+
+#[derive(Derivative)]
+pub struct MiddlewareLogger<T, Middleware> 
+where
+	Middleware: Communication<T>,
+{
+	middleware: Middleware,
+	log_level: LogLevel,
+	log_message: LogMessage,
+	#[derivative(Default(value="true"))]
+	activity: bool,
+	_phantom: PhantomData<T>,
+}
+
+#[derive(Derivative)]
+#[derivative(Default)]
+pub struct FileLogger {
+	log_level: LogLevel,
+	file_name: String,
+	#[derivative(Default(value="true"))]
+	activity: bool,
+}
+
+impl ILogging for ConsoleLogger {
+	fn set_log_level(&mut self, log_level: &str) {
+		match log_level {
+			"trace" => self.log_level = LogLevel::Trace,
+			"debug" => self.log_level = LogLevel::Debug,
+			"info" => self.log_level = LogLevel::Info,
+			"warn" => self.log_level = LogLevel::Warn,
+			"error" => self.log_level = LogLevel::Error,
+			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+		}
+	}
+	fn set_true(&mut self) {
+		self.activity = true;
+	}
+	fn set_false(&mut self) {
+		self.activity = false;
+	}
+	fn process(&self, msg_level: LogLevel, msg: &str) {
+		if self.activity == true {
+			if (self.log_level) <= (msg_level) {
+				match msg_level { 
+					LogLevel::Trace => println!("[Trace] {}", &msg),
+					LogLevel::Debug => println!("[Debug] {}", &msg),
+					LogLevel::Info => println!("[Info] {}", &msg),
+					LogLevel::Warn => println!("[Warn] {}", &msg),
+					LogLevel::Error => println!("[Error] {}", &msg),
+				}
+			}
+		}
+	}
+}
 
 
 #[repr(C)]
 #[derive(Derivative)]
 #[derivative(Debug, Default)]
-pub struct Log<T, Serializer, Middleware> 
+pub struct Log<T, Middleware> 
 where 
-	Serializer: Serialization<T>,
 	Middleware: Communication<T>,
 {
 	pub log_message: LogMessage,
@@ -22,96 +155,35 @@ where
 	pub publish_level: LogLevel,
 	pub print: bool,
 	pub print_level: LogLevel,
-	pub serializer: Serializer,
+	#[derivative(Default(value = "Rc::new(serializer::Serializer {})"))]
+	pub serializer: Rc<dyn Serialization<T>>,
 	pub middleware: Middleware,
 	_phantom: PhantomData<T>,
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct DefaultSerializer;
-#[repr(C)]
-#[derive(Debug)]
-pub struct DefaultMiddleware;
 
-impl Default for DefaultSerializer {
-    fn default() -> Self {
-		DefaultSerializer // DefaultSerializer에 대한 기본 구현
-    }
-}
-
-impl Default for DefaultMiddleware {
-    fn default() -> Self {
-		DefaultMiddleware // DefaultMiddleware에 대한 기본 구현
-    }
-}
-
-impl Serialization<String> for DefaultSerializer {
-	fn serialize_msg(&self, log_message: &LogMessage) -> String {
-		// Serialization
-		let log_level: String = format!("{:?}", &log_message.log_level);
-		let msg_data: String = log_message.msg.clone();
-		let timestamp: String = log_message.timestamp.clone();
-		
-		let data: String = format!("{}-{}-{}", log_level, msg_data, timestamp);
-		data
-	}
-
-	fn deserialize_msg(&self, data: &String) -> LogMessage {
-		let first = data.find("-").unwrap();
-		let second = data.rfind("-").unwrap();
-		let log_level_str = &data[..first];
-		let msg_data = &data[first..second];
-		let timestamp = &data[second..];
-		LogMessage {
-			log_level: LogLevel::from_str(log_level_str).unwrap(),
-			msg: msg_data.to_string(),
-			timestamp: timestamp.to_string(),
-		}
-	}
-}
-
-impl DefaultMiddleware {
-	async fn receiver(&self) {
-		println!("You need to implement function the receiver function of Middleware.");
-	}
-}
-
-impl Communication<String> for DefaultMiddleware {
-	async fn sender(&self, data: String) {
-		println!("You need to implement function the sender function of Middleware. Your Data is {}", &data);
-	}
-}
-
-impl Communication<Vec<u8>> for DefaultMiddleware {
-	async fn sender(&self, data: Vec<u8>) {
-		println!("You need to implement function the sender function of Middleware. Your Data is {:?}", &data);
-	}
-}
-
-
-impl<'a> Log <Vec<u8>, CapnpSerializer, ZenohMiddleware<'a>>
+impl<'a> Log <Vec<u8>, ZenohMiddleware<'a>>
 where 
-	CapnpSerializer: Serialization<Vec<u8>> + Default,
 	ZenohMiddleware<'a>: Communication<Vec<u8>>,
 {
     #[no_mangle]
 	pub async fn default() -> Self {
 		let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
-		Log::log().serializer(CapnpSerializer).middleware(middleware)
+		let serializer = SerializerFactory::new().capnp_serializer();
+		Log::log().serializer(serializer).middleware(middleware)
 	}
 }
 
-impl<T, Serializer, Middleware> Log<T, Serializer, Middleware>
+impl<T, Middleware> Log<T, Middleware>
 where
-    Serializer: Serialization<T> + Default,
+	T: Default,
 	Middleware: Communication<T> + Default,
 {
 	pub fn log() -> Self {
 		Log { print: true, publish: true, .. Default::default() }
 	}
 
-	pub fn serializer(mut self, serializer: Serializer) -> Log<T, Serializer, Middleware> {
+	pub fn serializer(mut self, serializer: Rc<dyn Serialization<T>>) -> Log<T, Middleware> {
 		Log {
 			log_message: self.log_message,
             publish: self.publish,
@@ -126,7 +198,7 @@ where
 		// self
     }
 
-    pub fn middleware(mut self, middleware: Middleware) -> Log<T, Serializer, Middleware> {
+    pub fn middleware(mut self, middleware: Middleware) -> Log<T, Middleware> {
 		Log {
 			log_message: self.log_message,
             publish: self.publish,
@@ -187,60 +259,29 @@ where
 		self.log_message = LogMessage{..Default::default()}; // Message 초기화
 	}
 
-    fn get_timestamp(&self) -> String {
-        let now: chrono::DateTime<Utc> = Utc::now();
-        let now_format: String = now.format("%Y/%m/%d %T").to_string();
-        now_format
-    }
-
     pub async fn trace(&mut self, message: String) {
-		let log_message: LogMessage = LogMessage {
-			log_level: LogLevel::Trace,
-			msg: message,
-			timestamp: self.get_timestamp(),
-		};
-		self.log_message = log_message;
+		self.log_message.msg(LogLevel::Trace,message);
 		self.process_log().await;
 	}
 
     pub async fn debug(&mut self, message: String) {
-		let log_message: LogMessage = LogMessage {
-			log_level: LogLevel::Debug,
-			msg: message,
-			timestamp: self.get_timestamp(),
-		};
-		self.log_message = log_message;
+		self.log_message.msg(LogLevel::Debug, message);
 		self.process_log().await;
 	}
 
 
     pub async fn info(&mut self, message: String) {
-		let log_message: LogMessage = LogMessage {
-			log_level: LogLevel::Info,
-			msg: message,
-			timestamp: self.get_timestamp(),
-		};
-		self.log_message = log_message;
+		self.log_message.msg(LogLevel::Info, message);
 		self.process_log().await;
 	}
 
     pub async fn warn(&mut self, message: String) {
-		let log_message: LogMessage = LogMessage {
-			log_level: LogLevel::Warn,
-			msg: message,
-			timestamp: self.get_timestamp(),
-		};
-		self.log_message = log_message;
+		self.log_message.msg(LogLevel::Warn, message);
 		self.process_log().await;
 	}
 
     pub async fn error(&mut self, message: String) {
-		let log_message: LogMessage = LogMessage {
-			log_level: LogLevel::Error,
-			msg: message,
-			timestamp: self.get_timestamp(),
-		};
-		self.log_message = log_message;
+		self.log_message.msg(LogLevel::Error, message);
 		self.process_log().await;
 	}
 }
@@ -248,21 +289,27 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+	use std::ptr;
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-    async fn it_works() {
-		let mut log: Log<Vec<u8>, CapnpSerializer, ZenohMiddleware<'_>> = Log::default().await;
-		log.debug(String::from(format!("Default Setting: {:?}", log))).await;
-		log.set_publish_level(LogLevel::Warn);
-		log.debug(String::from(format!("Change Pub log level: {:?}", log))).await;
-		log.set_print_level(LogLevel::Debug);
-		log.debug(String::from(format!("Change Print log level: {:?}", log))).await;
-		
-		log.trace(String::from("This is Trace!")).await;
-		log.debug(String::from("This is Debug!")).await;
-		log.info(String::from("This is Info!")).await;
-		log.warn(String::from("This is Warn!")).await;
-		log.error(String::from("This is Error!")).await;
-		log.debug(String::from(format!("log: {:?}", log))).await;
-    }
+	async fn logger_works() {
+		let mut logger = Logger::new();
+		let mut console_logger_a = ConsoleLogger::default();
+		let mut console_logger_b = ConsoleLogger {
+			activity: false,
+			..Default::default()
+		};
+
+		logger.attach(&console_logger_a);
+		logger.attach(&mut console_logger_b);
+		println!("{:?}", logger);
+
+		// Detach using the raw pointer to the logger
+		logger.detach(&console_logger_a);
+		println!("{:?}", logger);
+		logger.attach(&console_logger_a);
+		// console_logger_b.set_true();
+		println!("{:?}", logger);
+		logger.error("hi?");
+	}
 }
