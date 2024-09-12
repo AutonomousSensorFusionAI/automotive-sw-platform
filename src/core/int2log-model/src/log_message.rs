@@ -49,7 +49,7 @@ impl LogMessage {
             .frames()
             .iter()
             .flat_map(|frame| frame.symbols())
-            .nth(3)?;
+            .nth(4)?;
         let name = format!("{}::{}",
                                             symbol.name()?,
                                             symbol.lineno()?);
