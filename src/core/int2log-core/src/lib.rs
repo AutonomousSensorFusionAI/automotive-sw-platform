@@ -35,6 +35,9 @@ pub trait ILogger {
 #[derive(Debug)]
 pub struct Logger {
 	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
+	default_console: Option<Rc<RefCell<ConsoleLogger>>>,
+	default_file: Option<Rc<RefCell<FileLogger>>>,
+	default_middeleware: Option<Rc<RefCell<MiddlewareLogger<Vec<u8>>>>>,
 }
 
 impl Default for Logger {
@@ -43,9 +46,12 @@ impl Default for Logger {
 		let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let file_logger = Rc::new(RefCell::new(FileLogger::default()));
 		let middleware_logger = Rc::new(RefCell::new(MiddlewareLogger::default()));
+		logger.default_console = Some(console_logger.clone());
+		logger.default_file = Some(file_logger.clone());
+		logger.default_middeleware = Some(middleware_logger.clone());
 		logger.attach(console_logger.clone());
 		logger.attach(file_logger.clone());
-		logger.attach(middleware_logger);
+		logger.attach(middleware_logger.clone());
 		logger
 	}
 }
@@ -54,7 +60,22 @@ impl Logger {
 	pub fn new() -> Logger {
 		Logger {
 			loggers: Vec::new(),
+			default_console: None,
+			default_file: None,
+			default_middeleware: None,
 		}
+	}
+	pub fn get_default_logger(&self) -> (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>) {
+		(self.default_console(), self.default_file(), self.default_middeleware())
+	}
+	pub fn default_console(&self) -> Rc<RefCell<ConsoleLogger>> {
+		self.default_console.clone().expect("You don't have Default Console Logger. Please check if you defined the Logger using the default function.")
+	}
+	pub fn default_file(&self) -> Rc<RefCell<FileLogger>> {
+		self.default_file.clone().expect("You don't have Default File Logger. Please check if you defined the Logger using the default function.")
+	}
+	pub fn default_middeleware(&self) -> Rc<RefCell<MiddlewareLogger<Vec<u8>>>> {
+		self.default_middeleware.clone().expect("You don't have Default Middleware Logger. Please check if you defined the Logger using the default function.")
 	}
 }
 
@@ -385,6 +406,8 @@ mod tests {
 	#[test]
 	fn log_works() {
 		let mut log = Log::default();
+		let my_console = log.logger.default_console();
+		my_console.borrow_mut().set_log_level("error");
 		println!("{:?}", log);
 		log.error("Hi, Error!".to_string());
 	}
@@ -394,7 +417,7 @@ mod tests {
 		let mut logger = Logger::new();
 		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger::default()));
-		let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
+		let file_logger = Rc::new(RefCell::new(FileLogger::default()));
 		console_logger_b.borrow_mut().set_log_level("error");
 		let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
 		logger.attach(console_logger_a.clone());
