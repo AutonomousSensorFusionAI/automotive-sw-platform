@@ -32,11 +32,6 @@ pub trait ILogger {
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn process(&self, log_message: &LogMessage);
-	// fn trace(&self, msg: &str);
-	// fn debug(&self, msg: &str);
-	// fn info(&self, msg: &str);
-	// fn warn(&self, msg: &str);
-	// fn error(&self, msg: &str);
 }
 
 #[derive(Debug)]
@@ -71,8 +66,6 @@ impl ILogger for Logger {
 	}
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
-		// let logger_ptr = Rc::as_ptr(&logger) as *const dyn ILogging;
-		// self.loggers.retain(|l| Rc::as_ptr(l) as *const dyn ILogging != logger_ptr);
 	}
 	fn process(&self, log_message: &LogMessage) {
 		for item in self.loggers.iter() {
@@ -187,7 +180,7 @@ impl FileLogger {
 		self.file_path = file_path.to_string();
 	}
 
-	pub fn get_log_file(&self) -> File{
+	fn get_log_file(&self) -> File{
 		let mut file = OpenOptions::new()
 			.write(true)
 			.append(true)
