@@ -1,17 +1,13 @@
-use chrono::offset::Utc;
 use derivative::Derivative;
 use std::{
 	fmt::Debug,
-	ptr,
 	fs::{File, OpenOptions},
 	io::Write,
 	marker::PhantomData,
-	future::Future,
 	rc::Rc,
 	cell::RefCell,
 };
 use tokio::{
-	runtime::Runtime,
 	task::block_in_place,
 };
 use futures::executor::block_on;
@@ -23,6 +19,7 @@ use int2log_model::serializer::*;
 use int2log_zenoh::*;
 
 pub trait ILogging: Debug {
+	fn get_log_level(&mut self, log_level: LogLevel);
 	fn set_log_level(&mut self, log_level: &str);
 	fn set_true(&mut self);
 	fn set_false(&mut self);
@@ -31,6 +28,7 @@ pub trait ILogging: Debug {
 pub trait ILogger {
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
+	fn get_log_level(&self, log_level: &str);
 	fn process(&self, log_message: &LogMessage);
 }
 
@@ -67,6 +65,25 @@ impl ILogger for Logger {
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
 	}
+	fn get_log_level(&self, log_level: &str) {
+		let log_level = match log_level {
+			"trace" => Some(LogLevel::Trace),
+			"debug" => Some(LogLevel::Debug),
+			"info" => Some(LogLevel::Info),
+			"warn" => Some(LogLevel::Warn),
+			"error" => Some(LogLevel::Error),
+			_ => None,
+		};
+		
+		match log_level {
+			Some(log_level) =>
+				for item in self.loggers.iter() {
+					let mut logger_ref = item.borrow_mut();
+					logger_ref.get_log_level(log_level);
+				},
+			None => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+		}
+	}
 	fn process(&self, log_message: &LogMessage) {
 		for item in self.loggers.iter() {
 			let logger_ref = item.borrow();
@@ -78,35 +95,44 @@ impl ILogger for Logger {
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct ConsoleLogger {
-	pub log_level: LogLevel,
+	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	pub activity: bool,
+	activity: bool,
+	set_flag: bool,
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct MiddlewareLogger<T> 
 {
-	pub middleware: Rc<dyn Communication<T>>,
-	pub serializer: Rc<dyn Serialization<T>>,
-	pub log_level: LogLevel,
+	middleware: Rc<dyn Communication<T>>,
+	serializer: Rc<dyn Serialization<T>>,
+	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	pub activity: bool,
-	pub _phantom: PhantomData<T>,
+	activity: bool,
+	set_flag: bool,
+	_phantom: PhantomData<T>,
 }
 
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct FileLogger {
-	pub log_level: LogLevel,
+	log_level: LogLevel,
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
-	pub file_path: String,
+	file_path: String,
 	#[derivative(Default(value="true"))]
-	pub activity: bool,
+	activity: bool,
+	set_flag: bool,
 }
 
 impl ILogging for ConsoleLogger {
+	fn get_log_level(&mut self, log_level: LogLevel) {
+		if self.set_flag == false {
+			self.log_level = log_level;
+		}
+	}
 	fn set_log_level(&mut self, log_level: &str) {
+		self.set_flag = true;
 		match log_level {
 			"trace" => self.log_level = LogLevel::Trace,
 			"debug" => self.log_level = LogLevel::Debug,
@@ -138,7 +164,13 @@ impl ILogging for ConsoleLogger {
 }
 
 impl ILogging for FileLogger {
+	fn get_log_level(&mut self, log_level: LogLevel) {
+		if self.set_flag == false {
+			self.log_level = log_level;
+		}
+	}
 	fn set_log_level(&mut self, log_level: &str) {
+		self.set_flag = true;
 		match log_level {
 			"trace" => self.log_level = LogLevel::Trace,
 			"debug" => self.log_level = LogLevel::Debug,
@@ -181,7 +213,7 @@ impl FileLogger {
 	}
 
 	fn get_log_file(&self) -> File{
-		let mut file = OpenOptions::new()
+		let file = OpenOptions::new()
 			.write(true)
 			.append(true)
 			.create(true)
@@ -196,7 +228,13 @@ impl<T> ILogging for MiddlewareLogger<T>
 where
 	T: Debug,
 {
+	fn get_log_level(&mut self, log_level: LogLevel) {
+		if self.set_flag == false {
+			self.log_level = log_level;
+		}
+	}
 	fn set_log_level(&mut self, log_level: &str) {
+		self.set_flag = true;
 		match log_level {
 			"trace" => self.log_level = LogLevel::Trace,
 			"debug" => self.log_level = LogLevel::Debug,
@@ -245,24 +283,27 @@ impl<T> MiddlewareLogger<T> {
 			serializer,
 			middleware,
 			activity: true,
+			set_flag: false,
 			_phantom: Default::default(),
 		}
 	}
-	pub fn serializer(mut self, serializer: Rc<dyn Serialization<T>>) -> Self {
+	pub fn serializer(self, serializer: Rc<dyn Serialization<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
 			serializer,
 			middleware: self.middleware,
 			activity: self.activity,
+			set_flag: self.set_flag,
 			_phantom: Default::default(),
 		}
     }
-	pub fn middleware(mut self, middleware: Rc<dyn Communication<T>>) -> Self {
+	pub fn middleware(self, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
 			serializer: self.serializer,
 			middleware,
 			activity: self.activity,
+			set_flag: self.set_flag,
 			_phantom: Default::default(),
 		}
     }
@@ -278,7 +319,8 @@ pub struct Log {
 }
 
 impl Log {
-	pub fn new(logger: Logger) -> Self {
+	pub fn new(log_level: &str, logger: Logger) -> Self {
+		logger.get_log_level(log_level);
 		Log { logger, .. Default::default() }
 	}
 
@@ -343,6 +385,24 @@ mod tests {
 	#[test]
 	fn log_works() {
 		let mut log = Log::default();
+		println!("{:?}", log);
+		log.error("Hi, Error!".to_string());
+	}
+
+	#[test]
+	fn custom_log_works() {
+		let mut logger = Logger::new();
+		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
+		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger::default()));
+		let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
+		console_logger_b.borrow_mut().set_log_level("error");
+		let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
+		logger.attach(console_logger_a.clone());
+		logger.attach(console_logger_b.clone());
+		logger.attach(file_logger.clone());
+		logger.attach(middleware.clone());
+		// let mut log = Log::default();
+		let mut log = Log::new("debug", logger);
 		println!("{:?}", log);
 		log.error("Hi, Error!".to_string());
 	}
