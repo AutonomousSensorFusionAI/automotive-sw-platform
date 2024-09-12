@@ -1,14 +1,20 @@
 use int2log_core::*;
-// use int2log_model::*;
-use int2log_model::log_level::*;
-use int2log_model::log_message::*;
-// use int2log_zenoh::*;
-use std::{
-	rc::Rc,
-	cell::RefCell,
-};
-
 fn main() {
+	let mut log = Log::default();
+	println!("{:?}", log);
+	log.error("Hi, Error!".to_string());
+}
+
+
+fn make_logger_ex() {
+	use std::{
+		rc::Rc,
+		cell::RefCell,
+	};
+	use int2log_model::log_level::*;
+	use int2log_model::log_message::*;
+
+
 	let mut logger = Logger::new();
 	let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 	let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
