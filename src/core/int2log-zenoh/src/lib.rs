@@ -1,13 +1,7 @@
 use int2log_model::*;
-use zenoh::handlers::DefaultHandler;
 use std::future::Future;
 use std::pin::Pin;
 use zenoh::prelude::*;
-use zenoh::time::Timestamp;
-use zenoh::bytes::ZBytes;
-use flume::Receiver;
-
-use tokio::runtime::Runtime;
 
 #[derive(Debug, Clone)]
 pub struct ZenohConfiguration {
@@ -89,7 +83,7 @@ impl<'a> ZenohMiddlewareBuilder<'a> {
 
     pub async fn build(self) -> Result<ZenohMiddleware<'a>, &'static str> {
         match self.session {
-            Some(session) => Ok(ZenohMiddleware::new(
+            Some(_session) => Ok(ZenohMiddleware::new(
                 self.config,
                 self.session,
                 self.publisher,

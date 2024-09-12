@@ -1,4 +1,4 @@
-use super::log_level::*;
+use crate::log_level::*;
 use chrono::offset::Utc;
 use backtrace::Backtrace;
 // use std::marker::Copy;
@@ -6,14 +6,14 @@ use backtrace::Backtrace;
 #[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct LogMessage {
-    pub log_level: super::log_level::LogLevel,
+    pub log_level: LogLevel,
     pub msg: String,
     pub timestamp: String,
     pub logger: String,
 }
 
 impl LogMessage {
-    pub fn make_msg(log_level: super::log_level::LogLevel, msg: String) -> Self {
+    pub fn make_msg(log_level: LogLevel, msg: String) -> Self {
         LogMessage {
             log_level,
             msg,
@@ -25,7 +25,7 @@ impl LogMessage {
         }
     }
 
-    pub fn msg(&mut self, log_level: super::log_level::LogLevel, msg: String) -> &mut Self{
+    pub fn msg(&mut self, log_level: LogLevel, msg: String) -> &mut Self{
         self.log_level = log_level;
         self.msg = msg;
         self.timestamp = Self::get_timestamp();
@@ -60,8 +60,6 @@ impl LogMessage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // use super::log_level::*;
-    use super::LogLevel;
 
 	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn it_works() {

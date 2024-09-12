@@ -4,11 +4,7 @@ use std::fmt;
 
 use super::*;
 use crate::log_message::*;
-use capnp::message::Builder;
-use capnp::serialize;
 use crate::log_message_capnp;
-use crate::log_level::*;
-use capnp::message::ReaderOptions;
 
 
 pub trait Serialization<T>: fmt::Debug {
@@ -146,8 +142,13 @@ mod tests {
     // #[tokio::test]
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn it_works() {
+		// How to define 
+
+		// Case 1
 		let base_serializer: Rc<Serializer> = Rc::new(Serializer {});
 		let capnp_serializer_dec: CapnpSerializer<Vec<u8>> = CapnpSerializer::new(base_serializer.clone());
+		
+		// Case 2
 		let serializer_factory: SerializerFactory<Vec<u8>> = SerializerFactory::new();
 		let capnp_serializer = serializer_factory.capnp_serializer();
 		println!("{:?}", capnp_serializer);
