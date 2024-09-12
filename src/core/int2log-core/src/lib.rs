@@ -44,6 +44,19 @@ pub struct Logger {
 	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
 }
 
+impl Default for Logger {
+	fn default() -> Self {
+		let mut logger = Logger::new();
+		let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
+		let file_logger = Rc::new(RefCell::new(FileLogger::default()));
+		let middleware_logger = Rc::new(RefCell::new(MiddlewareLogger::default()));
+		logger.attach(console_logger.clone());
+		logger.attach(file_logger.clone());
+		logger.attach(middleware_logger);
+		logger
+	}
+}
+
 impl Logger {
 	pub fn new() -> Logger {
 		Logger {
@@ -67,41 +80,6 @@ impl ILogger for Logger {
 			logger_ref.process(&log_message);
 		}
 	}
-	// fn trace(&self, msg: &str) {
-	// 	let log_message = LogMessage::make_msg(LogLevel::Trace, msg.to_string());
-	// 	for item in self.loggers.iter() {
-	// 		let logger_ref = item.borrow();
-	// 		logger_ref.process(&log_message);
-	// 	}
-	// }
-	// fn debug(&self, msg: &str) {
-	// 	let log_message = LogMessage::make_msg(LogLevel::Debug, msg.to_string());
-	// 	for item in self.loggers.iter() {
-	// 		let logger_ref = item.borrow();
-	// 		logger_ref.process(&log_message);
-	// 	}
-	// }
-	// fn info(&self, msg: &str) {
-	// 	let log_message = LogMessage::make_msg(LogLevel::Info, msg.to_string());
-	// 	for item in self.loggers.iter() {
-	// 		let logger_ref = item.borrow();
-	// 		logger_ref.process(&log_message);
-	// 	}
-	// }
-	// fn warn(&self, msg: &str) {
-	// 	let log_message = LogMessage::make_msg(LogLevel::Warn, msg.to_string());
-	// 	for item in self.loggers.iter() {
-	// 		let logger_ref = item.borrow();
-	// 		logger_ref.process(&log_message);
-	// 	}
-	// }
-	// fn error(&self, msg: &str) {
-	// 	let log_message = LogMessage::make_msg(LogLevel::Error, msg.to_string());
-	// 	for item in self.loggers.iter() {
-	// 		let logger_ref = item.borrow();
-	// 		logger_ref.process(&log_message);
-	// 	}
-	// }
 }
 
 #[derive(Derivative)]
@@ -300,144 +278,41 @@ impl<T> MiddlewareLogger<T> {
 #[repr(C)]
 #[derive(Derivative)]
 #[derivative(Debug, Default)]
-pub struct Log<T, Middleware> 
-where 
-	Middleware: Communication<T>,
-{
+pub struct Log {
+	pub log_level: LogLevel,
 	pub log_message: LogMessage,
-	pub publish: bool,
-	#[derivative(Default(value = "LogLevel::Error"))]
-	pub publish_level: LogLevel,
-	pub print: bool,
-	pub print_level: LogLevel,
-	#[derivative(Default(value = "Rc::new(serializer::Serializer {})"))]
-	pub serializer: Rc<dyn Serialization<T>>,
-	pub middleware: Middleware,
-	_phantom: PhantomData<T>,
+	pub logger: Logger,
 }
 
-
-impl<'a> Log <Vec<u8>, ZenohMiddleware<'a>>
-where 
-	ZenohMiddleware<'a>: Communication<Vec<u8>>,
-{
-    #[no_mangle]
-	pub async fn default() -> Self {
-		let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
-		let serializer = SerializerFactory::new().capnp_serializer();
-		Log::log().serializer(serializer).middleware(middleware)
-	}
-}
-
-impl<T, Middleware> Log<T, Middleware>
-where
-	T: Default,
-	Middleware: Communication<T> + Default,
-{
-	pub fn log() -> Self {
-		Log { print: true, publish: true, .. Default::default() }
+impl Log {
+	pub fn new(logger: Logger) -> Self {
+		Log { logger, .. Default::default() }
 	}
 
-	pub fn serializer(mut self, serializer: Rc<dyn Serialization<T>>) -> Log<T, Middleware> {
-		Log {
-			log_message: self.log_message,
-            publish: self.publish,
-            publish_level: self.publish_level,
-            print: self.print,
-            print_level: self.print_level,
-			serializer,
-			middleware: self.middleware,
-			_phantom: Default::default(),
-		}
-		// self.serializer = serializer;
-		// self
-    }
-
-    pub fn middleware(mut self, middleware: Middleware) -> Log<T, Middleware> {
-		Log {
-			log_message: self.log_message,
-            publish: self.publish,
-            publish_level: self.publish_level,
-            print: self.print,
-            print_level: self.print_level,
-			serializer: self.serializer,
-			middleware,
-			_phantom: Default::default(),
-		}
-    }
-
-	pub fn print(&mut self) {
-		if self.print == true {
-			self.print = false;
-		}
-		else if self.print == false {
-			self.print = true;
-		}
-	}
-
-	pub fn publish(&mut self) {
-		if self.publish == true {
-			self.publish = false;
-		}
-		else if self.publish == false {
-			self.publish = true;
-		}
-	}
-
-	pub fn set_publish_level(&mut self, log_level: LogLevel) {
-		self.publish_level = log_level;
-	}
-
-	pub fn set_print_level(&mut self, log_level: LogLevel) {
-		self.print_level = log_level;
-	}
-
-    pub async fn process_log(&mut self) {
-		if self.publish == true {
-			if (self.publish_level) <= (self.log_message.log_level) {
-				let data: T = self.serializer.serialize_msg(&self.log_message);
-				self.middleware.sender(data).await;
-			}
-		}
-
-		if self.print == true {
-			if (self.print_level) <= (self.log_message.log_level) {
-				match self.log_message.log_level { 
-					LogLevel::Trace => println!("[Trace] {}", &self.log_message.msg),
-					LogLevel::Debug => println!("[Debug] {}", &self.log_message.msg),
-					LogLevel::Info => println!("[Info] {}", &self.log_message.msg),
-					LogLevel::Warn => println!("[Warn] {}", &self.log_message.msg),
-					LogLevel::Error => println!("[Error] {}", &self.log_message.msg),
-				}
-			}
-		}
+    pub fn process(&mut self, log_level: LogLevel, msg: String) {
+		self.log_message.msg(log_level, msg);
+		self.logger.process(&self.log_message);
 		self.log_message = LogMessage{..Default::default()}; // Message 초기화
 	}
 
-    pub async fn trace(&mut self, message: String) {
-		self.log_message.msg(LogLevel::Trace,message);
-		self.process_log().await;
+    pub fn trace(&mut self, msg: String) {
+		self.process(LogLevel::Trace, msg);
 	}
 
-    pub async fn debug(&mut self, message: String) {
-		self.log_message.msg(LogLevel::Debug, message);
-		self.process_log().await;
+    pub fn debug(&mut self, msg: String) {
+		self.process(LogLevel::Debug, msg);
 	}
 
-
-    pub async fn info(&mut self, message: String) {
-		self.log_message.msg(LogLevel::Info, message);
-		self.process_log().await;
+    pub fn info(&mut self, msg: String) {
+		self.process(LogLevel::Info, msg);
 	}
 
-    pub async fn warn(&mut self, message: String) {
-		self.log_message.msg(LogLevel::Warn, message);
-		self.process_log().await;
+    pub fn warn(&mut self, msg: String) {
+		self.process(LogLevel::Warn, msg);
 	}
 
-    pub async fn error(&mut self, message: String) {
-		self.log_message.msg(LogLevel::Error, message);
-		self.process_log().await;
+    pub fn error(&mut self, msg: String) {
+		self.process(LogLevel::Error, msg);
 	}
 }
 
@@ -445,8 +320,8 @@ where
 mod tests {
     use super::*;
 
-	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
-	async fn logger_works() {
+	#[test]
+	fn logger_works() {
 		let mut logger = Logger::new();
 		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
@@ -470,6 +345,12 @@ mod tests {
 		
 		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
 		logger.process(&log_message);
-		// logger.error("hello! I'm error");
+	}
+
+	#[test]
+	fn log_works() {
+		let mut log = Log::default();
+		println!("{:?}", log);
+		log.error("Hi, Error!".to_string());
 	}
 }
