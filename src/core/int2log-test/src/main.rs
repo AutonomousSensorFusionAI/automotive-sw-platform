@@ -1,40 +1,35 @@
 use int2log_core::*;
-use int2log_model::*;
+// use int2log_model::*;
 use int2log_model::log_level::*;
 use int2log_model::log_message::*;
-use int2log_zenoh::*;
+// use int2log_zenoh::*;
+use std::{
+	rc::Rc,
+	cell::RefCell,
+};
 
-// #[tokio::main]
-#[tokio::main(flavor = "multi_thread", worker_threads = 1)]
-async fn main() {
-	/* Log version 1) 
-	 Log + Capnp + Zenoh  */
-	let mut log = Log::default().await;
-	/* Log version 2) 
-	 Log + DefaultSerializer(Data to String or Vec<u8>, not Capnp) + DefaultMiddleware(Send, Receive - X) */
-	// let mut log: Log<String, DefaultSerializer, DefaultMiddleware> = Log::log().middleware(DefaultMiddleware).serializer(DefaultSerializer);
+fn main() {
+	let mut logger = Logger::new();
+	let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
+	let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
+		activity: false,
+		..Default::default()
+	}));
+	let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
+	console_logger_b.borrow_mut().set_log_level("error");
+	let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
+	logger.attach(console_logger_a.clone());
+	logger.attach(console_logger_b.clone());
+	logger.attach(file_logger.clone());
+	logger.attach(middleware);
+	println!("{:?}", logger);
 
-	// Log version 3) Log + Capnp + DefaultMiddleware(Send, Receive - X)
-	// let mut log: Log<Vec<u8>, CapnpSerializer, DefaultMiddleware> = Log::log().serializer(CapnpSerializer).middleware(DefaultMiddleware);
+	logger.detach(console_logger_a.clone());
+	println!("{:?}", logger);
+	logger.attach(console_logger_a.clone());
+	console_logger_b.borrow_mut().set_true();
+	println!("{:?}", logger);
 	
-	// let middleware = ZenohMiddleware::default().await;
-	// let mut log: Log<String, DefaultSerializer, ZenohMiddleware> = Log::log().serializer(DefaultSerializer).middleware(middleware);
-
-	log.debug(String::from(format!("Default Setting: {:?}", log))).await;
-	log.trace(String::from("This is Trace!")).await;
-	log.debug(String::from("This is Debug!")).await;
-	log.info(String::from("This is Info!")).await;
-	log.warn(String::from("This is Warn!")).await;
-	log.error(String::from("This is Error!")).await;
-	log.set_publish_level(LogLevel::Warn);
-	log.debug(String::from(format!("Change Pub log level: {:?}", log))).await;
-	log.set_print_level(LogLevel::Debug);
-	log.debug(String::from(format!("Change Print log level: {:?}", log))).await;
-	
-	log.trace(String::from("This is Trace!")).await;
-	log.debug(String::from("This is Debug!")).await;
-	log.info(String::from("This is Info!")).await;
-	log.warn(String::from("This is Warn!")).await;
-	log.error(String::from("This is Error!")).await;
-	log.debug(String::from(format!("log: {:?}", log.log_message))).await;
+	let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
+	logger.process(&log_message);
 }
