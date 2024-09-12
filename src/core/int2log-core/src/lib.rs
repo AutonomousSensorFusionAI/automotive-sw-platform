@@ -8,9 +8,13 @@ use std::{
 	marker::PhantomData,
 	future::Future,
 	rc::Rc,
-	cell::RefCell
+	cell::RefCell,
 };
-use tokio::runtime::Runtime;
+use tokio::{
+	runtime::Runtime,
+	task::block_in_place,
+};
+use futures::executor::block_on;
 
 use int2log_model::*;
 use int2log_model::log_level::*;
@@ -36,12 +40,12 @@ pub trait ILogger {
 }
 
 #[derive(Debug)]
-struct Logger {
+pub struct Logger {
 	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
 }
 
 impl Logger {
-	fn new() -> Logger {
+	pub fn new() -> Logger {
 		Logger {
 			loggers: Vec::new(),
 		}
@@ -103,33 +107,31 @@ impl ILogger for Logger {
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct ConsoleLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	activity: bool,
+	pub activity: bool,
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
-pub struct MiddlewareLogger<T, Middleware> 
-where
-	Middleware: Communication<T> + Debug,
+pub struct MiddlewareLogger<T> 
 {
-	middleware: Middleware,
-	log_level: LogLevel,
-	log_message: LogMessage,
+	pub middleware: Rc<dyn Communication<T>>,
+	pub serializer: Rc<dyn Serialization<T>>,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	activity: bool,
-	_phantom: PhantomData<T>,
+	pub activity: bool,
+	pub _phantom: PhantomData<T>,
 }
 
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct FileLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
-	file_path: String,
+	pub file_path: String,
 	#[derivative(Default(value="true"))]
-	activity: bool,
+	pub activity: bool,
 }
 
 impl ILogging for ConsoleLogger {
@@ -203,11 +205,11 @@ impl FileLogger {
 		"log.txt".to_string()
 	}
 
-	fn set_file_path(&mut self, file_path: &str) {
+	pub fn set_file_path(&mut self, file_path: &str) {
 		self.file_path = file_path.to_string();
 	}
 
-	fn get_log_file(&self) -> File{
+	pub fn get_log_file(&self) -> File{
 		let mut file = OpenOptions::new()
 			.write(true)
 			.append(true)
@@ -217,6 +219,82 @@ impl FileLogger {
 			.unwrap();
 		file
 	}
+}
+
+impl<T> ILogging for MiddlewareLogger<T> 
+where
+	T: Debug,
+{
+	fn set_log_level(&mut self, log_level: &str) {
+		match log_level {
+			"trace" => self.log_level = LogLevel::Trace,
+			"debug" => self.log_level = LogLevel::Debug,
+			"info" => self.log_level = LogLevel::Info,
+			"warn" => self.log_level = LogLevel::Warn,
+			"error" => self.log_level = LogLevel::Error,
+			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+		}
+	}
+	fn set_true(&mut self) {
+		self.activity = true;
+	}
+	fn set_false(&mut self) {
+		self.activity = false;
+	}
+	fn process(&self, log_message: &LogMessage) {
+		if self.activity == true {
+			if (self.log_level) <= (log_message.log_level) {
+				let data: T = self.serializer.serialize_msg(log_message);
+				block_in_place(|| {
+					block_on(async {
+						self.middleware.sender(data).await
+					})
+				})
+			}
+		}
+	}
+}
+
+impl MiddlewareLogger<Vec<u8>> {
+	pub fn default() -> Self {
+		let middleware = Rc::new(block_in_place(|| {
+			block_on(async {
+				ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap()
+			})
+		}));
+		let serializer = SerializerFactory::new().capnp_serializer();
+		MiddlewareLogger::new(serializer, middleware)
+	}
+}
+
+impl<T> MiddlewareLogger<T> {
+	pub fn new(serializer: Rc<dyn Serialization<T>>, middleware: Rc<dyn Communication<T>>) -> Self {
+		MiddlewareLogger {
+			log_level: Default::default(),
+			serializer,
+			middleware,
+			activity: true,
+			_phantom: Default::default(),
+		}
+	}
+	pub fn serializer(mut self, serializer: Rc<dyn Serialization<T>>) -> Self {
+		MiddlewareLogger {
+			log_level: self.log_level,
+			serializer,
+			middleware: self.middleware,
+			activity: self.activity,
+			_phantom: Default::default(),
+		}
+    }
+	pub fn middleware(mut self, middleware: Rc<dyn Communication<T>>) -> Self {
+		MiddlewareLogger {
+			log_level: self.log_level,
+			serializer: self.serializer,
+			middleware,
+			activity: self.activity,
+			_phantom: Default::default(),
+		}
+    }
 }
 
 #[repr(C)]
@@ -377,10 +455,11 @@ mod tests {
 		}));
 		let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
 		console_logger_b.borrow_mut().set_log_level("error");
-
+		let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
 		logger.attach(console_logger_a.clone());
 		logger.attach(console_logger_b.clone());
 		logger.attach(file_logger.clone());
+		logger.attach(middleware);
 		println!("{:?}", logger);
 
 		logger.detach(console_logger_a.clone());
@@ -388,6 +467,9 @@ mod tests {
 		logger.attach(console_logger_a.clone());
 		console_logger_b.borrow_mut().set_true();
 		println!("{:?}", logger);
+		
+		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
+		logger.process(&log_message);
 		// logger.error("hello! I'm error");
 	}
 }

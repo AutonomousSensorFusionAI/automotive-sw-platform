@@ -1,7 +1,7 @@
 use int2log_model::*;
 use zenoh::handlers::DefaultHandler;
 use std::future::Future;
-
+use std::pin::Pin;
 use zenoh::prelude::*;
 use zenoh::time::Timestamp;
 use zenoh::bytes::ZBytes;
@@ -128,22 +128,42 @@ impl<'a> ZenohMiddleware<'a> {
     }
 }
 
-impl<'a> Communication<String> for ZenohMiddleware<'a>{
-    async fn sender(&self, data: String) {
-        if let Some(publisher) = &self.publisher {
-            publisher.put(data).await.unwrap();
-        }
+// impl<'a> Communication<String> for ZenohMiddleware<'a>{
+//     async fn sender(&self, data: String) {
+//         if let Some(publisher) = &self.publisher {
+//             publisher.put(data).await.unwrap();
+//         }
+//     }
+// }
+
+impl<'a> Communication<String> for ZenohMiddleware<'a> {
+    fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + '_>> {
+        Box::pin(async move {
+            if let Some(publisher) = &self.publisher {
+                publisher.put(data).await.unwrap();
+            }
+        })
     }
 }
 
 impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
-    async fn sender(&self, data: Vec<u8>) {
-    // fn sender(&self, data: Vec<u8>) -> impl Future<Output = ()> {
-        if let Some(publisher) = &self.publisher {
-            publisher.put(&data).await.unwrap();
-        }
+    fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + '_>> {
+        Box::pin(async move {
+            if let Some(publisher) = &self.publisher {
+                publisher.put(&data).await.unwrap();
+            }
+        })
     }
 }
+
+// impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
+//     async fn sender(&self, data: Vec<u8>) {
+//     // fn sender(&self, data: Vec<u8>) -> impl Future<Output = ()> {
+//         if let Some(publisher) = &self.publisher {
+//             publisher.put(&data).await.unwrap();
+//         }
+//     }
+// }
 
 impl<'a> ZenohMiddleware<'a> {
     pub async fn receiver(&self) {

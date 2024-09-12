@@ -1,11 +1,13 @@
 use std::future::Future;
+use std::pin::Pin;
+use std::fmt;
 pub mod log_message_capnp;
 pub mod serializer;
 pub mod log_level;
 pub mod log_message;
 
-pub trait Communication<T> {
-	fn sender(&self, t: T) -> impl Future<Output = ()>; // async fn
+pub trait Communication<T>: fmt::Debug {
+	fn sender(&self, t: T) -> Pin<Box<dyn Future<Output = ()> + '_>>;// -> Pin<Box<dyn Future<Output = ()>>>; // -> impl Future<Output = ()>; //-> Pin<Box<dyn Future<Output = ()> + Send>>;// // async fn
 }
 
 #[repr(C)]
@@ -25,13 +27,13 @@ impl DefaultMiddleware {
 }
 
 impl Communication<String> for DefaultMiddleware {
-	async fn sender(&self, data: String) {
+	fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()>>> {
 		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {}", &data);
 	}
 }
 
 impl Communication<Vec<u8>> for DefaultMiddleware {
-	async fn sender(&self, data: Vec<u8>) {
+	fn sender(&self, data: Vec<u8>)  -> Pin<Box<dyn Future<Output = ()>>> {
 		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {:?}", &data);
 	}
 }
