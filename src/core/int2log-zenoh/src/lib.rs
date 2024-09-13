@@ -131,7 +131,7 @@ impl<'a> ZenohMiddleware<'a> {
 // }
 
 impl<'a> Communication<String> for ZenohMiddleware<'a> {
-    fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + '_>> {
+    fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
             if let Some(publisher) = &self.publisher {
                 publisher.put(data).await.unwrap();
@@ -141,7 +141,7 @@ impl<'a> Communication<String> for ZenohMiddleware<'a> {
 }
 
 impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
-    fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + '_>> {
+    fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
             if let Some(publisher) = &self.publisher {
                 publisher.put(&data).await.unwrap();

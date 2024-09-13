@@ -7,7 +7,7 @@ pub mod log_level;
 pub mod log_message;
 
 pub trait Communication<T>: fmt::Debug {
-	fn sender(&self, t: T) -> Pin<Box<dyn Future<Output = ()> + '_>>;// -> Pin<Box<dyn Future<Output = ()>>>; // -> impl Future<Output = ()>; //-> Pin<Box<dyn Future<Output = ()> + Send>>;// // async fn
+	fn sender(&self, t: T) -> Pin<Box<dyn Future<Output = ()> + Send + '_>>;// -> Pin<Box<dyn Future<Output = ()>>>; // -> impl Future<Output = ()>; //-> Pin<Box<dyn Future<Output = ()> + Send>>;// // async fn
 }
 
 #[repr(C)]
@@ -27,13 +27,13 @@ impl DefaultMiddleware {
 }
 
 impl Communication<String> for DefaultMiddleware {
-	fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()>>> {
+	fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send>> {
 		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {}", &data);
 	}
 }
 
 impl Communication<Vec<u8>> for DefaultMiddleware {
-	fn sender(&self, data: Vec<u8>)  -> Pin<Box<dyn Future<Output = ()>>> {
+	fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send>> {
 		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {:?}", &data);
 	}
 }
