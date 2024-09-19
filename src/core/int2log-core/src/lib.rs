@@ -289,7 +289,12 @@ impl MiddlewareLogger<Vec<u8>> {
 	pub fn default() -> Self {
 		let middleware = Rc::new(block_in_place(|| {
 			block_on(async {
-				ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap()
+				// ZenohMiddlewareBuilder::default()
+				// .config().await
+				// .unwrap()
+				// .build().await
+				// .unwrap()
+				ZenohMiddleware::default().await
 			})
 		}));
 		let serializer = SerializerFactory::new().capnp_serializer();

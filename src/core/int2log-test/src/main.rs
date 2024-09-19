@@ -1,8 +1,13 @@
 use int2log_core::*;
-fn main() {
+#[tokio::main]
+async fn main() {
 	let mut log = Log::default();
 	println!("{:?}", log);
-	log.error("Hi, Error!".to_string());
+	
+	loop{
+		log.error("Hi, Error!".to_string());
+		tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+	}
 }
 
 #[test]

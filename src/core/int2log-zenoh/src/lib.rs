@@ -1,4 +1,7 @@
 use int2log_model::*;
+use zenoh::pubsub::Subscriber;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use std::future::Future;
 use std::pin::Pin;
 use zenoh::prelude::*;
@@ -31,83 +34,90 @@ impl Default for ZenohConfiguration {
 }
 
 #[derive(Default, Debug)]
-pub struct ZenohMiddlewareBuilder<'a> {
+pub struct ZenohMiddlewareBuilder {
     config: ZenohConfiguration,
-    session: Option<&'a zenoh::Session>,
-    publisher: Option<zenoh::pubsub::Publisher<'a>>,
-    subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>,
+    session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
+    publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>,
+    // subscriber: Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>,
+    subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,
 }
 
-impl<'a> ZenohMiddlewareBuilder<'a> {
-    pub async fn config(mut self) -> Result<Self, zenoh::Error> {// -> Result<Self, zenoh::Error>{
-        // self.config = Some(config.clone());
-        
-        let session = zenoh::open(self.config.config.clone()).await.unwrap();
-        let session_ref = Box::leak(Box::new(session)); // 힙에 메모리를 할당해야 하지만, 프로그램이 끝날 때까지 해당 메모리를 해제할 필요가 없는 상황을 위한 것
+impl ZenohMiddlewareBuilder {
+    pub async fn config(mut self) -> Self{ //-> Result<Self, zenoh::Error> {// -> Result<Self, zenoh::Error>{
+        // self.session = Arc::new(Mutex::new(None));
+        let config = self.config.clone();
+        let session = self.session.clone();
+        let publisher = self.publisher.clone();
+        let subscriber = self.subscriber.clone();
 
-        if let Some(pub_key) = self.config.pub_key.clone() {
-            let publisher: zenoh::pubsub::Publisher = session_ref.declare_publisher(pub_key).await.unwrap();
-            self = self.publisher(publisher);
-        }
+        tokio::spawn(async move {
+            loop {
+                match zenoh::open(config.config.clone()).await {
+                    Ok(new_session) => {
+                        let new_session = Arc::new(new_session);
 
-        if let Some(sub_key) = self.config.sub_key.clone() {
-            let subscriber = session_ref.declare_subscriber(sub_key).await.unwrap();
-            self = self.subscriber(subscriber);
-        }
+                        let mut session_guard = session.lock().await;
+                        *session_guard = Some(new_session.clone());
+                        println!("Zenoh session established successfully.");
 
-        self.session = Some(session_ref);
-        Ok(self)
+                        if let Some(pub_key) = config.pub_key.clone() {   
+                            match session_guard.as_ref().unwrap().declare_publisher(pub_key).await {
+                                Ok(new_pub) => {
+                                    // self = self.publisher(publisher);
+                                    let mut publisher_guard = publisher.lock().await;
+                                    *publisher_guard = Some(new_pub);
+                                    println!("Publisher created successfully.");
+                                }
+                                Err(e) => println!("Failed to create publisher: {:?}", e),
+                            }
+                        }
+
+                        if let Some(sub_key) = config.sub_key.clone() {   
+                            match new_session.declare_subscriber(sub_key).await {
+                                Ok(new_sub) => {
+                                    let mut subscriber_guard = subscriber.lock().await;
+                                    *subscriber_guard = Some(new_sub);
+                                    println!("Subscriber created successfully.");
+                                }
+                                Err(e) => println!("Failed to create subscriber: {:?}", e),
+                            }
+                        }
+                        break;
+                    }
+                    Err(e) => {
+                        println!("Failed to establish Zenoh session: {:?}. Retrying in 5 seconds...", e);
+                        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                    }
+                }
+            }
+        });
+        self
     }
 
-    pub fn session(&mut self, session: Option<&'a zenoh::Session>) {
-        self.session = session;
-    }
-
-    pub fn publisher(self, publisher: zenoh::pubsub::Publisher<'a>) -> ZenohMiddlewareBuilder<'a> {
-        ZenohMiddlewareBuilder {
-            config: self.config,
-            session: self.session,
-            publisher: Some(publisher),
-            subscriber: self.subscriber,
-        }
-    }
-
-    pub fn subscriber(self, subscriber: zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>) -> ZenohMiddlewareBuilder<'a> {
-        ZenohMiddlewareBuilder {
-            config: self.config,
-            session: self.session,
-            publisher: self.publisher,
-            subscriber: Some(subscriber),
-        }
-    }
-
-    pub async fn build(self) -> Result<ZenohMiddleware<'a>, &'static str> {
-        match self.session {
-            Some(_session) => Ok(ZenohMiddleware::new(
-                self.config,
-                self.session,
-                self.publisher,
-                self.subscriber,
-            ).await),
-            None => Err("Session is required to build ZenohMiddleware"),
-        }
+    pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
+        Ok(ZenohMiddleware::new(
+            self.config,
+            self.session,
+            self.publisher,
+            self.subscriber,
+        ).await)
     }
 }
 
 #[derive(Debug, Default)]
-pub struct ZenohMiddleware<'a> {
+pub struct ZenohMiddleware {
     pub config: ZenohConfiguration,
-    pub session: Option<&'a zenoh::Session>,
-    pub publisher: Option<zenoh::pubsub::Publisher<'a>>,
-    pub subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>,
+    pub session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
+    pub publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>,
+    pub subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,
 }
 
-impl<'a> ZenohMiddleware<'a> {
+impl ZenohMiddleware {
     pub async fn new(
         config: ZenohConfiguration, 
-        session: Option<&'a zenoh::Session>,
-        publisher: Option<zenoh::pubsub::Publisher<'a>>, 
-        subscriber: Option<zenoh::pubsub::Subscriber<'a, flume::Receiver<zenoh::sample::Sample>>>)
+        session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
+        publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>, 
+        subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,)
          -> Self {
         ZenohMiddleware {
             config,
@@ -118,52 +128,67 @@ impl<'a> ZenohMiddleware<'a> {
     }
 
     pub async fn default() -> Self{
-        ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap()
+        ZenohMiddlewareBuilder::default().config().await.build().await.unwrap()
     }
 }
 
-// impl<'a> Communication<String> for ZenohMiddleware<'a>{
-//     async fn sender(&self, data: String) {
-//         if let Some(publisher) = &self.publisher {
-//             publisher.put(data).await.unwrap();
-//         }
-//     }
-// }
-
-impl<'a> Communication<String> for ZenohMiddleware<'a> {
+impl Communication<String> for ZenohMiddleware {
     fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            if let Some(publisher) = &self.publisher {
+            let what = self.session.lock().await.as_ref().cloned();
+            match what {
+                Some(_) => println!("Some!"),
+                None => println!("None"),
+            }
+            let publisher_opt = self.publisher.lock().await.as_ref().cloned();
+            if let Some(publisher) = publisher_opt {
                 publisher.put(data).await.unwrap();
             }
         })
     }
+
+    // fn is_open(&self) -> impl Future<Output = bool> + Send {
+    //     async move{
+    //         let session_opt = self.session.lock().await.as_ref().cloned();
+    //         match session_opt {
+    //             Some(_) => true,
+    //             None => false,
+    //         }
+    //     }
+    // }
 }
 
-impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
+impl Communication<Vec<u8>> for ZenohMiddleware{
     fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            if let Some(publisher) = &self.publisher {
-                publisher.put(&data).await.unwrap();
+            let what = self.session.lock().await.as_ref().cloned();
+            match what {
+                Some(session) => println!("{:?}", session),
+                None => println!("None"),
+            }
+            let publisher_opt = self.publisher.lock().await.as_ref().cloned();
+            if let Some(publisher) = publisher_opt {
+                publisher.put(data).await.unwrap();
             }
         })
     }
+
+    // fn is_open(&self) -> impl Future<Output = bool> + Send {
+    //     async move{
+    //         let session_opt = self.session.lock().await.as_ref().cloned();
+    //         match session_opt {
+    //             Some(_) => true,
+    //             None => false,
+    //         }
+    //     }
+    // }
 }
 
-// impl<'a> Communication<Vec<u8>> for ZenohMiddleware<'a>{
-//     async fn sender(&self, data: Vec<u8>) {
-//     // fn sender(&self, data: Vec<u8>) -> impl Future<Output = ()> {
-//         if let Some(publisher) = &self.publisher {
-//             publisher.put(&data).await.unwrap();
-//         }
-//     }
-// }
-
-impl<'a> ZenohMiddleware<'a> {
+impl ZenohMiddleware {
     pub async fn receiver(&self) {
-        if let Some(subscriber) = &self.subscriber {
+        let subscriber_opt = self.subscriber.lock().await;
+        if let Some(subscriber) = &*subscriber_opt {
             if let Ok(sample) = subscriber.recv_async().await {
-                // return Ok(Some(String::from_utf8_lossy(&sample.value.payload.contiguous()).into_owned()));
                 let payload = sample
                     .payload()
                     .deserialize::<String>()
