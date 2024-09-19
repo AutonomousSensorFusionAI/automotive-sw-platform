@@ -37,9 +37,9 @@ impl Default for ZenohConfiguration {
 pub struct ZenohMiddlewareBuilder {
     config: ZenohConfiguration,
     session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
-    publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>,
-    // subscriber: Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>,
-    subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,
+    publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>,
+    // subscriber: Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>,
+    subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>>>,
 }
 
 impl ZenohMiddlewareBuilder {
@@ -65,7 +65,7 @@ impl ZenohMiddlewareBuilder {
                                 Ok(new_pub) => {
                                     // self = self.publisher(publisher);
                                     let mut publisher_guard = publisher.lock().await;
-                                    *publisher_guard = Some(new_pub);
+                                    *publisher_guard = Some(Arc::new(new_pub));
                                     println!("Publisher created successfully.");
                                 }
                                 Err(e) => println!("Failed to create publisher: {:?}", e),
@@ -108,16 +108,16 @@ impl ZenohMiddlewareBuilder {
 pub struct ZenohMiddleware {
     pub config: ZenohConfiguration,
     pub session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
-    pub publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>,
-    pub subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,
+    pub publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>, 
+    pub subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>>>,
 }
 
 impl ZenohMiddleware {
     pub async fn new(
         config: ZenohConfiguration, 
         session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
-        publisher: Arc<Mutex<Option<zenoh::pubsub::Publisher<'static>>>>, 
-        subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<'static, flume::Receiver<zenoh::sample::Sample>>>>>,)
+        publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>, 
+        subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>>>,)
          -> Self {
         ZenohMiddleware {
             config,
