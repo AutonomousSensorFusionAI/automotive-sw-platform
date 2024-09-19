@@ -28,7 +28,6 @@ impl Default for ZenohConfiguration {
             config: ZenohConfiguration::load_config_from_file("zenoh.json5"),
             pub_key: Some(String::from("log")),
             sub_key: None,
-            // sub_key: Some(String::from("log")),
         }
     }
 }
@@ -38,13 +37,11 @@ pub struct ZenohMiddlewareBuilder {
     config: ZenohConfiguration,
     session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
     publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>,
-    // subscriber: Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>,
     subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>>>,
 }
 
 impl ZenohMiddlewareBuilder {
-    pub async fn config(mut self) -> Self{ //-> Result<Self, zenoh::Error> {// -> Result<Self, zenoh::Error>{
-        // self.session = Arc::new(Mutex::new(None));
+    pub async fn config(mut self) -> Self{
         let config = self.config.clone();
         let session = self.session.clone();
         let publisher = self.publisher.clone();
@@ -146,42 +143,22 @@ impl Communication<String> for ZenohMiddleware {
             }
         })
     }
-
-    // fn is_open(&self) -> impl Future<Output = bool> + Send {
-    //     async move{
-    //         let session_opt = self.session.lock().await.as_ref().cloned();
-    //         match session_opt {
-    //             Some(_) => true,
-    //             None => false,
-    //         }
-    //     }
-    // }
 }
 
 impl Communication<Vec<u8>> for ZenohMiddleware{
     fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            let what = self.session.lock().await.as_ref().cloned();
-            match what {
-                Some(session) => println!("{:?}", session),
-                None => println!("None"),
-            }
+            // let is_session = self.session.lock().await.as_ref().cloned();
+            // match is_session {
+            //     Some(session) => println!("{:?}", session),
+            //     None => println!("None"),
+            // }
             let publisher_opt = self.publisher.lock().await.as_ref().cloned();
             if let Some(publisher) = publisher_opt {
                 publisher.put(data).await.unwrap();
             }
         })
     }
-
-    // fn is_open(&self) -> impl Future<Output = bool> + Send {
-    //     async move{
-    //         let session_opt = self.session.lock().await.as_ref().cloned();
-    //         match session_opt {
-    //             Some(_) => true,
-    //             None => false,
-    //         }
-    //     }
-    // }
 }
 
 impl ZenohMiddleware {
