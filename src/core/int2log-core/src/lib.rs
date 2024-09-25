@@ -18,6 +18,25 @@ use int2log_model::log_message::*;
 use int2log_model::serializer::*;
 use int2log_zenoh::*;
 
+/*
+	- Rust의 supertrait에 관한 내용
+	trait ILogging: Debug 에서 ':Debug'는 supertrait(고급 트레잇, 슈퍼 트레잇)이라고 부릅니다. 
+	이는 ILogging 트레잇을 구현하는 타입은 Debug 타입을 구현해야 함을 의미합니다.
+
+	여기서 ':Debug' 가 필요한 이유는 struct Logger가 Debug를 구현한다는 #[derive(Debug)] 특성을 지정했기 때문입니다.
+	
+	Struct Logger의 필드인 loggers는 ILogging 트레잇을 구현하는 어떤 타입도 가질 수 있게 되는데(dyn ILogging),
+	컴파일러는 이 ILogging 트레잇을 구현하는 동적인 객체가 Dubug 타입을 구현한다는 것을 알 수 없으므로
+	ILogging: Debug 를 정의하지 않으면, #[derive(Debug)]를 Logger 구조체에 사용할 수 없습니다.
+
+	- ILogging 트레잇 설명
+	ILogging 트레잇은 콘솔 로거, 파일 로거, 미들웨어 로거 등 로거에서 반드시 구현해야하는 트레잇입니다.
+	여기서 로거는 log4j의 어펜더와 비슷한 것이라고 보시면 됩니다.
+	해당 로거들에서 반드시 필요할 것이라고 생각한
+	로그 레벨 세팅, active 여부 세팅(set true, false), 로그 메시지 처리(process),
+	그리고 사용자가 로그 레벨을 세팅하지 않은 경우, 
+	기본 로그 시스템의 로그 레벨을 가져올 수 있도록 하는 get_log_level 함수로 이루어져 있습니다.
+*/
 pub trait ILogging: Debug {
 	fn get_log_level(&mut self, log_level: LogLevel);
 	fn set_log_level(&mut self, log_level: &str);
@@ -25,6 +44,17 @@ pub trait ILogging: Debug {
 	fn set_false(&mut self);
 	fn process(&self, log_message: &LogMessage);
 }
+
+/*
+	- ILogger 트레잇 설명
+	ILogger는 Logger(사용자가 세팅한 로거 집합)가 구현해야 하는 트레잇입니다.
+	attach 함수로 원하는 로거를 붙이거나, detach로 제거 가능합니다.
+	또한, get_log_level의 역할은 위 ILogging의 get_log_level 함수와 같습니다.
+	loggers.get_log_level -> inner_logger.get_log_level 호출로 처리하게 됩니다.
+	process 또한 위와 동일합니다.
+
+	attach, detach에서 사용된 'Rc<RefCell<dyn ILogging>>'에 대한 내용은 Logger 구조체에서 같이 다루도록 하겠습니다.
+*/
 pub trait ILogger {
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
@@ -32,6 +62,69 @@ pub trait ILogger {
 	fn process(&self, log_message: &LogMessage);
 }
 
+#[cfg(test)]
+mod logger_examples{
+	use super::*;
+
+	#[test]
+	fn logger_example(){
+		let rt = tokio::runtime::Runtime::new().unwrap();
+
+		rt.block_on(async {
+			let default_logger = Logger::default();
+			println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Debug, activity: true, set_flag: false } })
+
+			let def_console_logger = default_logger.default_console.as_ref().unwrap();
+			def_console_logger.borrow_mut().set_false();
+			def_console_logger.borrow_mut().set_log_level("error");
+			
+			println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Error, activity: false, set_flag: true } })
+		});
+	}
+
+	#[test]
+	fn none_ref_ex() {
+		let rt = tokio::runtime::Runtime::new().unwrap();
+
+		rt.block_on(async {
+			let default_logger = Logger::default();
+			println!("{:?}", default_logger.default_console);
+
+			let def_console_logger = default_logger.default_console.unwrap();
+			def_console_logger.borrow_mut().set_false();
+			def_console_logger.borrow_mut().set_log_level("error");
+			
+			// println!("{:?}", default_logger); // 에러
+		});
+	}
+}
+/*
+	- Option<...>
+	Logger를 default로 정의한 경우(Logger::default()), 콘솔, 파일, 미들웨어 로거에 각각 접근하기가 어려워집니다.
+	위의 예제 logger_example() 처럼 default인 경우에도 로그 레벨, active 세팅을 가능하게 하고자
+	default_console, default_file, default_middeleware 필드를 따로 정의하였습니다.
+	Rust에는 Null이 없으므로 default가 아닌 경우를 위해 Option을 사용하였습니다.
+	default인 경우 Some(logger) 타입, 아닌 경우 None 타입을 필드에 저장합니다.
+
+	- Vec<...>
+	로거(트레잇 ILogging을 구현하는 동적 객체 타입)들을 저장하기 위해 사용하였습니다.
+	
+	- Rc<RefCell<..>>
+	러스트 소유권 규칙 때문에 사용한 타입입니다.
+	위의 예제 logger_example() 에서 def_console_logger 변수 정의시 .as_ref()를 사용하였는데, 
+	none_ref_ex() 에서처럼 def_console_logger 정의할 때 .as_ref()를 따로 사용하지 않는 경우를 살펴보면,
+	error[E0382]: borrow of partially moved value: `default_logger` 라는 에러를 내면서 동작하지 않습니다.
+	default_logger.default_console의 소유권을 def_console_logger에 빼앗겼기 때문입니다. 이를 방지하고자 <Rc<RefCell<..>> 타입을 사용하였습니다.
+	
+	Rc<T>는 참조 카운터(다중 소유권 지원) 스마트 포인터의 일종이며, 
+	RefCell<T>는 내부 가변성 패턴(단일 소유권 지원, 불변 참조를 사용하면서 값을 수정할 수 있도록 함)을 사용하는 스마트 포인터입니다.
+	Rc<RefCell<T>> 로 사용한다면, 다중 소유권과 내부 가변성을 가진 자료형을 사용할 수 있게 됩니다.
+	자세한 내용: https://doc.rust-kr.org/ch15-05-interior-mutability.html
+	
+	- Logger 구조체 설명
+	loggers: default 혹은 사용자가 정의한 ILogging을 구현하는 로거들의 집합입니다.
+	default_...: Logger를 default로 정의(Logger::default())하면, default 로거들이 loggers에 추가되며, 해당 필드에도 저장됩니다.
+*/
 #[derive(Debug)]
 pub struct Logger {
 	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
@@ -40,6 +133,15 @@ pub struct Logger {
 	default_middeleware: Option<Rc<RefCell<MiddlewareLogger<Vec<u8>>>>>,
 }
 
+/*
+	- Logger의 Default 트레잇
+	Logger가 가진 필드의 타입들은 Vec, Option으로, 
+	트레잇 없이 #[derive(Default)]만 지정해도 Default 타입을 정의할 수 있습니다.
+
+	#[derive(Default)] 사용시: Logger { loggers: [], default_console: None, default_file: None, default_middeleware: None }
+
+	편의를 위해 다른 로거들(콘솔, 파일, 미들웨어)을 정의하지 않고도 기본으로 사용할 수 있도록 Default 트레잇을 따로 정의하였습니다.
+ */
 impl Default for Logger {
 	fn default() -> Self {
 		let mut logger = Logger::new();
@@ -56,6 +158,17 @@ impl Default for Logger {
 	}
 }
 
+/*
+	Logger 구조체의 필드를 pub으로 공개하지 않기 때문에, 따로 함수를 만들어 로거를 얻을 수 있도록 하였습니다.
+	
+	아니면, 아래처럼 필드별로 앞에 pub을 붙여줘야 해요!
+	pub struct Logger {
+		pub loggers: Vec<Rc<RefCell<dyn ILogging>>>,
+		pub default_console: Option<Rc<RefCell<ConsoleLogger>>>,
+		pub default_file: Option<Rc<RefCell<FileLogger>>>,
+		pub default_middeleware: Option<Rc<RefCell<MiddlewareLogger<Vec<u8>>>>>,
+	}
+*/
 impl Logger {
 	pub fn new() -> Logger {
 		Logger {
@@ -113,6 +226,11 @@ impl ILogger for Logger {
 	}
 }
 
+/*
+	원래 bool의 Default 타입은 false입니다.
+	#[derive(Derivative)] 사용 후
+	#[derivative(Default(value="true"))]로 기본 타입을 따로 정의할 수 있습니다.
+*/
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct ConsoleLogger {
@@ -289,11 +407,6 @@ impl MiddlewareLogger<Vec<u8>> {
 	pub fn default() -> Self {
 		let middleware = Rc::new(block_in_place(|| {
 			block_on(async {
-				// ZenohMiddlewareBuilder::default()
-				// .config().await
-				// .unwrap()
-				// .build().await
-				// .unwrap()
 				ZenohMiddleware::default().await
 			})
 		}));
