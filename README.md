@@ -24,3 +24,8 @@
 ## :pencil: License
 
 This project is licensed under [GPL-3.0](./LICENSE) license.
+
+## :🔨: Architecture
+![component_Log](./docs/component_Log.png)
+
+https://www.notion.so/intellectuscorp/Int2Log-System-bf6e9eb70916461d954db3c69d257d72?pvs=4
