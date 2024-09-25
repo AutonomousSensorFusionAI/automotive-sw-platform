@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use std::future::Future;
 use std::pin::Pin;
-use zenoh::prelude::*;
+
 
 #[derive(Debug, Clone)]
 pub struct ZenohConfiguration {
@@ -191,8 +191,6 @@ impl ZenohMiddleware {
 
 #[cfg(test)]
 mod tests {
-    use zenoh::config::default;
-
     use super::*;
 
     // #[tokio::test]
