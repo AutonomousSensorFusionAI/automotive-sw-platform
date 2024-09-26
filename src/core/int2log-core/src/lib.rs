@@ -68,34 +68,26 @@ mod logger_examples{
 
 	#[test]
 	fn logger_example(){
-		let rt = tokio::runtime::Runtime::new().unwrap();
+		let default_logger = Logger::default();
+		println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Debug, active: true, set_flag: false } })
 
-		rt.block_on(async {
-			let default_logger = Logger::default();
-			println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Debug, activity: true, set_flag: false } })
-
-			let def_console_logger = default_logger.default_console.as_ref().unwrap();
-			def_console_logger.borrow_mut().set_false();
-			def_console_logger.borrow_mut().set_log_level("error");
-			
-			println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Error, activity: false, set_flag: true } })
-		});
+		let def_console_logger = default_logger.default_console.as_ref().unwrap();
+		def_console_logger.borrow_mut().set_false();
+		def_console_logger.borrow_mut().set_log_level("error");
+		
+		println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Error, active: false, set_flag: true } })
 	}
 
 	#[test]
 	fn none_ref_ex() {
-		let rt = tokio::runtime::Runtime::new().unwrap();
+		let default_logger = Logger::default();
+		println!("{:?}", default_logger.default_console);
 
-		rt.block_on(async {
-			let default_logger = Logger::default();
-			println!("{:?}", default_logger.default_console);
-
-			let def_console_logger = default_logger.default_console.unwrap();
-			def_console_logger.borrow_mut().set_false();
-			def_console_logger.borrow_mut().set_log_level("error");
-			
-			// println!("{:?}", default_logger); // 에러
-		});
+		let def_console_logger = default_logger.default_console.unwrap();
+		def_console_logger.borrow_mut().set_false();
+		def_console_logger.borrow_mut().set_log_level("error");
+		
+		// println!("{:?}", default_logger); // 에러
 	}
 }
 /*
