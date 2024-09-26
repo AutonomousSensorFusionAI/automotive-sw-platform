@@ -40,8 +40,8 @@ use int2log_zenoh::*;
 pub trait ILogging: Debug {
 	fn get_log_level(&mut self, log_level: LogLevel);
 	fn set_log_level(&mut self, log_level: &str);
-	fn set_true(&mut self);
-	fn set_false(&mut self);
+	fn set_active_true(&mut self);
+	fn set_active_false(&mut self);
 	fn process(&self, log_message: &LogMessage);
 }
 
@@ -72,7 +72,7 @@ mod logger_examples{
 		println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Debug, active: true, set_flag: false } })
 
 		let def_console_logger = default_logger.default_console.as_ref().unwrap();
-		def_console_logger.borrow_mut().set_false();
+		def_console_logger.borrow_mut().set_active_false();
 		def_console_logger.borrow_mut().set_log_level("error");
 		
 		println!("{:?}", default_logger.default_console); // Some(RefCell { value: ConsoleLogger { log_level: Error, active: false, set_flag: true } })
@@ -84,7 +84,7 @@ mod logger_examples{
 		println!("{:?}", default_logger.default_console);
 
 		let def_console_logger = default_logger.default_console.unwrap();
-		def_console_logger.borrow_mut().set_false();
+		def_console_logger.borrow_mut().set_active_false();
 		def_console_logger.borrow_mut().set_log_level("error");
 		
 		// println!("{:?}", default_logger); // 에러
@@ -228,7 +228,7 @@ impl ILogger for Logger {
 pub struct ConsoleLogger {
 	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	activity: bool,
+	active: bool,
 	set_flag: bool,
 }
 
@@ -240,7 +240,7 @@ pub struct MiddlewareLogger<T>
 	serializer: Rc<dyn Serialization<T>>,
 	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	activity: bool,
+	active: bool,
 	set_flag: bool,
 	_phantom: PhantomData<T>,
 }
@@ -252,7 +252,7 @@ pub struct FileLogger {
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
 	file_path: String,
 	#[derivative(Default(value="true"))]
-	activity: bool,
+	active: bool,
 	set_flag: bool,
 }
 
@@ -273,14 +273,14 @@ impl ILogging for ConsoleLogger {
 			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
 		}
 	}
-	fn set_true(&mut self) {
-		self.activity = true;
+	fn set_active_true(&mut self) {
+		self.active = true;
 	}
-	fn set_false(&mut self) {
-		self.activity = false;
+	fn set_active_false(&mut self) {
+		self.active = false;
 	}
 	fn process(&self, log_message: &LogMessage) {
-		if self.activity == true {
+		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				match log_message.log_level { 
 					LogLevel::Trace => println!("{} - Trace - {}", log_message.timestamp, &log_message.msg),
@@ -311,15 +311,15 @@ impl ILogging for FileLogger {
 			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
 		}
 	}
-	fn set_true(&mut self) {
-		self.activity = true;
+	fn set_active_true(&mut self) {
+		self.active = true;
 	}
-	fn set_false(&mut self) {
-		self.activity = false;
+	fn set_active_false(&mut self) {
+		self.active = false;
 	}
 	fn process(&self, log_message: &LogMessage) {
 		let mut file = self.get_log_file();
-		if self.activity == true {
+		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				let log_entry = match log_message.log_level {
 					LogLevel::Trace => format!("{} - Trace - {} \n", log_message.timestamp, &log_message.msg),
@@ -375,14 +375,14 @@ where
 			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
 		}
 	}
-	fn set_true(&mut self) {
-		self.activity = true;
+	fn set_active_true(&mut self) {
+		self.active = true;
 	}
-	fn set_false(&mut self) {
-		self.activity = false;
+	fn set_active_false(&mut self) {
+		self.active = false;
 	}
 	fn process(&self, log_message: &LogMessage) {
-		if self.activity == true {
+		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				let data: T = self.serializer.serialize_msg(log_message);
 				block_in_place(|| {
@@ -413,7 +413,7 @@ impl<T> MiddlewareLogger<T> {
 			log_level: Default::default(),
 			serializer,
 			middleware,
-			activity: true,
+			active: true,
 			set_flag: false,
 			_phantom: Default::default(),
 		}
@@ -423,7 +423,7 @@ impl<T> MiddlewareLogger<T> {
 			log_level: self.log_level,
 			serializer,
 			middleware: self.middleware,
-			activity: self.activity,
+			active: self.active,
 			set_flag: self.set_flag,
 			_phantom: Default::default(),
 		}
@@ -433,7 +433,7 @@ impl<T> MiddlewareLogger<T> {
 			log_level: self.log_level,
 			serializer: self.serializer,
 			middleware,
-			activity: self.activity,
+			active: self.active,
 			set_flag: self.set_flag,
 			_phantom: Default::default(),
 		}
@@ -491,7 +491,7 @@ mod tests {
 		let mut logger = Logger::new();
 		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
-			activity: false,
+			active: false,
 			..Default::default()
 		}));
 		let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
@@ -506,7 +506,7 @@ mod tests {
 		logger.detach(console_logger_a.clone());
 		println!("{:?}", logger);
 		logger.attach(console_logger_a.clone());
-		console_logger_b.borrow_mut().set_true();
+		console_logger_b.borrow_mut().set_active_true();
 		println!("{:?}", logger);
 		
 		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
