@@ -1,9 +1,6 @@
 use int2log_model::*;
-use zenoh::pubsub::Subscriber;
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use std::future::Future;
-use std::pin::Pin;
+use std::{sync::Arc, future::Future, pin::Pin, thread};
+use tokio::{sync::Mutex, runtime::Runtime};
 
 
 #[derive(Debug, Clone)]
@@ -47,46 +44,49 @@ impl ZenohMiddlewareBuilder {
         let publisher = self.publisher.clone();
         let subscriber = self.subscriber.clone();
 
-        tokio::spawn(async move {
-            loop {
-                match zenoh::open(config.config.clone()).await {
-                    Ok(new_session) => {
-                        let new_session = Arc::new(new_session);
+        thread::spawn(move || { // Log를 사용하는 main 함수에 `.await`가 없어도, tokio::spawn을 쓰면 async main을 사용해야 하는 문제 해결.
+            let rt = Runtime::new().unwrap();
+            rt.block_on(async {
+                loop {
+                    match zenoh::open(config.config.clone()).await {
+                        Ok(new_session) => {
+                            let new_session = Arc::new(new_session);
 
-                        let mut session_guard = session.lock().await;
-                        *session_guard = Some(new_session.clone());
-                        println!("Zenoh session established successfully.");
+                            let mut session_guard = session.lock().await;
+                            *session_guard = Some(new_session.clone());
+                            println!("Zenoh session established successfully.");
 
-                        if let Some(pub_key) = config.pub_key.clone() {   
-                            match session_guard.as_ref().unwrap().declare_publisher(pub_key).await {
-                                Ok(new_pub) => {
-                                    // self = self.publisher(publisher);
-                                    let mut publisher_guard = publisher.lock().await;
-                                    *publisher_guard = Some(Arc::new(new_pub));
-                                    println!("Publisher created successfully.");
+                            if let Some(pub_key) = config.pub_key.clone() {   
+                                match session_guard.as_ref().unwrap().declare_publisher(pub_key).await {
+                                    Ok(new_pub) => {
+                                        // self = self.publisher(publisher);
+                                        let mut publisher_guard = publisher.lock().await;
+                                        *publisher_guard = Some(Arc::new(new_pub));
+                                        println!("Publisher created successfully.");
+                                    }
+                                    Err(e) => println!("Failed to create publisher: {:?}", e),
                                 }
-                                Err(e) => println!("Failed to create publisher: {:?}", e),
                             }
-                        }
 
-                        if let Some(sub_key) = config.sub_key.clone() {   
-                            match new_session.declare_subscriber(sub_key).await {
-                                Ok(new_sub) => {
-                                    let mut subscriber_guard = subscriber.lock().await;
-                                    *subscriber_guard = Some(new_sub);
-                                    println!("Subscriber created successfully.");
+                            if let Some(sub_key) = config.sub_key.clone() {   
+                                match new_session.declare_subscriber(sub_key).await {
+                                    Ok(new_sub) => {
+                                        let mut subscriber_guard = subscriber.lock().await;
+                                        *subscriber_guard = Some(new_sub);
+                                        println!("Subscriber created successfully.");
+                                    }
+                                    Err(e) => println!("Failed to create subscriber: {:?}", e),
                                 }
-                                Err(e) => println!("Failed to create subscriber: {:?}", e),
                             }
+                            break;
                         }
-                        break;
-                    }
-                    Err(e) => {
-                        println!("Failed to establish Zenoh session: {:?}. Retrying in 5 seconds...", e);
-                        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                        Err(e) => {
+                            println!("Failed to establish Zenoh session: {:?}. Retrying in 5 seconds...", e);
+                            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                        }
                     }
                 }
-            }
+            })
         });
         self
     }
