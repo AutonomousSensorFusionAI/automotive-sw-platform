@@ -295,14 +295,8 @@ impl LoggingSpec for ConsoleLogger {
 	/// You can set the log level like logger.set_log_level("trace").
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
-		match log_level {
-			"trace" => self.log_level = LogLevel::Trace,
-			"debug" => self.log_level = LogLevel::Debug,
-			"info" => self.log_level = LogLevel::Info,
-			"warn" => self.log_level = LogLevel::Warn,
-			"error" => self.log_level = LogLevel::Error,
-			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
-		}
+		let log_level = LogLevel::from_str(log_level);
+		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
 	/// You can set the active true like logger.set_active_true().
 	fn set_active_true(&mut self) {
@@ -343,14 +337,8 @@ impl LoggingSpec for FileLogger {
 	/// You can set the log level like logger.set_log_level("trace").
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
-		match log_level {
-			"trace" => self.log_level = LogLevel::Trace,
-			"debug" => self.log_level = LogLevel::Debug,
-			"info" => self.log_level = LogLevel::Info,
-			"warn" => self.log_level = LogLevel::Warn,
-			"error" => self.log_level = LogLevel::Error,
-			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
-		}
+		let log_level = LogLevel::from_str(log_level);
+		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
 	/// You can set the active true like logger.set_active_true().
 	fn set_active_true(&mut self) {
@@ -418,14 +406,8 @@ where
 	/// You can set the log level like logger.set_log_level("trace").
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
-		match log_level {
-			"trace" => self.log_level = LogLevel::Trace,
-			"debug" => self.log_level = LogLevel::Debug,
-			"info" => self.log_level = LogLevel::Info,
-			"warn" => self.log_level = LogLevel::Warn,
-			"error" => self.log_level = LogLevel::Error,
-			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
-		}
+		let log_level = LogLevel::from_str(log_level);
+		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
 	/// You can set the active true like logger.set_active_true().
 	fn set_active_true(&mut self) {
@@ -508,14 +490,7 @@ pub struct Log {
 impl Log {
 	pub fn new(log_level: &str, logger: Rc<RefCell<Logger>>) -> Self {
 		// 사용자로부터 입력 받은 로그 레벨 -> enum 변환
-		let log_level = match log_level {
-			"trace" => Some(LogLevel::Trace),
-			"debug" => Some(LogLevel::Debug),
-			"info" => Some(LogLevel::Info),
-			"warn" => Some(LogLevel::Warn),
-			"error" => Some(LogLevel::Error),
-			_ => None,
-		};
+		let log_level = LogLevel::from_str(log_level);
 		let log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 
 		// Logger에 해당 레벨 세팅 (Logger 생성시 세팅 되었을 경우 적용 X)

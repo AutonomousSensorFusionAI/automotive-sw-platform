@@ -11,12 +11,12 @@ pub enum LogLevel {
 
 impl LogLevel {
     pub fn from_str(level_str: &str) -> Option<Self>{
-        match level_str {
-            "Trace" => Some(LogLevel::Trace),
-            "Debug" => Some(LogLevel::Debug),
-            "Info" => Some(LogLevel::Info),
-            "Warn" => Some(LogLevel::Warn),
-            "Error" => Some(LogLevel::Error),
+        match level_str.to_lowercase().as_str() { // 대소문자 구분 없앰
+            "trace" => Some(LogLevel::Trace),
+            "debug" => Some(LogLevel::Debug),
+            "info" => Some(LogLevel::Info),
+            "warn" => Some(LogLevel::Warn),
+            "error" => Some(LogLevel::Error),
             _ => None,
         }
     }
