@@ -18,6 +18,7 @@ use int2log_model::log_message::*;
 use int2log_model::serializer::*;
 use int2log_zenoh::*;
 
+
 /*
 	- Rust의 supertrait에 관한 내용
 	trait ILogging: Debug 에서 ':Debug'는 supertrait(고급 트레잇, 슈퍼 트레잇)이라고 부릅니다. 
@@ -122,28 +123,28 @@ mod logger_examples{
 	RefCell<T>는 내부 가변성 패턴(단일 소유권 지원, 불변 참조를 사용하면서 값을 수정할 수 있도록 함)을 사용하는 스마트 포인터입니다.
 	Rc<RefCell<T>> 로 사용한다면, 다중 소유권과 내부 가변성을 가진 자료형을 사용할 수 있게 됩니다.
 	자세한 내용: https://doc.rust-kr.org/ch15-05-interior-mutability.html
-	
-	- Logger 구조체 설명
-	loggers: default 혹은 사용자가 정의한 ILogging을 구현하는 로거들의 집합입니다.
-	default_...: Logger를 default로 정의(Logger::default())하면, default 로거들이 loggers에 추가되며, 해당 필드에도 저장됩니다.
 */
 #[derive(Debug)]
+/// Logger 집합 구조체
 pub struct Logger {
+	/// It is a collection of either default-defined or user-defined loggers that implement the ILogging interface.
 	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
+	/// The field exists or is None only when defined as the default.
 	default_console: Option<Rc<RefCell<ConsoleLogger>>>,
+	/// The field exists or is None only when defined as the default.
 	default_file: Option<Rc<RefCell<FileLogger>>>,
+	/// The field exists or is None only when defined as the default.
 	default_middeleware: Option<Rc<RefCell<MiddlewareLogger<Vec<u8>>>>>,
 }
 
 /*
 	- Logger의 Default 트레잇
-	Logger가 가진 필드의 타입들은 Vec, Option으로, 
-	트레잇 없이 #[derive(Default)]만 지정해도 Default 타입을 정의할 수 있습니다.
-
+	Logger가 가진 필드의 타입들(Vec, Option)은 Default 트레잇 구현없이도 정의할 수 있습니다.
 	#[derive(Default)] 사용시: Logger { loggers: [], default_console: None, default_file: None, default_middeleware: None }
 
 	편의를 위해 다른 로거들(콘솔, 파일, 미들웨어)을 정의하지 않고도 기본으로 사용할 수 있도록 Default 트레잇을 따로 정의하였습니다.
  */
+/// Logger에 ConsoleLogger, FileLogger, MiddlewareLogger(Zenoh) 집합 등록
 impl Default for Logger {
 	fn default() -> Self {
 		let mut logger = Logger::new();
@@ -153,6 +154,7 @@ impl Default for Logger {
 		logger.default_console = Some(console_logger.clone());
 		logger.default_file = Some(file_logger.clone());
 		logger.default_middeleware = Some(middleware_logger.clone());
+		// loggers 필드에도 default logger들 추가
 		logger.attach(console_logger.clone());
 		logger.attach(file_logger.clone());
 		logger.attach(middleware_logger.clone());
@@ -160,19 +162,8 @@ impl Default for Logger {
 	}
 }
 
-/*
-	Logger 구조체의 필드를 pub으로 공개하지 않기 때문에, 따로 함수를 만들어 로거를 얻을 수 있도록 하였습니다.
-	
-	아니면, 아래처럼 필드별로 앞에 pub을 붙여줘야 해요!
-	pub struct Logger {
-		pub loggers: Vec<Rc<RefCell<dyn ILogging>>>,
-		pub default_console: Option<Rc<RefCell<ConsoleLogger>>>,
-		pub default_file: Option<Rc<RefCell<FileLogger>>>,
-		pub default_middeleware: Option<Rc<RefCell<MiddlewareLogger<Vec<u8>>>>>,
-	}
-*/
 impl Logger {
-	pub fn new() -> Logger {
+	pub fn new() -> Self {
 		Logger {
 			loggers: Vec::new(),
 			default_console: None,
@@ -180,15 +171,24 @@ impl Logger {
 			default_middeleware: None,
 		}
 	}
+
+	/// Note that it is only available when defined as the default.
+	/// Return type: (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>)
 	pub fn get_default_logger(&self) -> (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>) {
 		(self.default_console(), self.default_file(), self.default_middeleware())
 	}
+	/// Note that it is only available when defined as the default.
+	/// Retrun type: Rc<RefCell<ConsoleLogger>>
 	pub fn default_console(&self) -> Rc<RefCell<ConsoleLogger>> {
 		self.default_console.clone().expect("You don't have Default Console Logger. Please check if you defined the Logger using the default function.")
 	}
+	/// Note that it is only available when defined as the default.
+	/// Retrun type: Rc<RefCell<FileLogger>>
 	pub fn default_file(&self) -> Rc<RefCell<FileLogger>> {
 		self.default_file.clone().expect("You don't have Default File Logger. Please check if you defined the Logger using the default function.")
 	}
+	/// Note that it is only available when defined as the default.
+	/// Retrun type: Rc<RefCell<MiddlewareLogger<Vec<u8>>>>
 	pub fn default_middeleware(&self) -> Rc<RefCell<MiddlewareLogger<Vec<u8>>>> {
 		self.default_middeleware.clone().expect("You don't have Default Middleware Logger. Please check if you defined the Logger using the default function.")
 	}
@@ -213,7 +213,7 @@ impl LogCommon for Logger {
 			logger_ref.get_log_level(log_level);
 		}
 	}
-	/// Processing Log Message. Don't use directly
+	/// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		for item in self.loggers.iter() {
 			let logger_ref = item.borrow();
@@ -231,6 +231,7 @@ impl ILogger for Logger {}
 */
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
+/// Console Logger
 pub struct ConsoleLogger {
 	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
@@ -240,21 +241,27 @@ pub struct ConsoleLogger {
 
 #[derive(Derivative)]
 #[derivative(Debug)]
+/// Middleware Logger
+/// Default Middleware is Zenoh
 pub struct MiddlewareLogger<T> 
-{
+{	
+	// 여러 MiddlewareLogger 인스턴스가 동일한 middleware나 serializer를 참조할 수 있도록 Rc로 래핑.
+	// 해당 트레잇을 구현하는 타입만 필드로 저장할 수 있도록 동적 디스패치 사용
 	middleware: Rc<dyn Communication<T>>,
 	serializer: Rc<dyn Serialization<T>>,
 	log_level: LogLevel,
 	#[derivative(Default(value="true"))]
 	active: bool,
 	set_flag: bool,
-	_phantom: PhantomData<T>,
+	_phantom: PhantomData<T>, // T를 위해 정의된 필드.
 }
 
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
 pub struct FileLogger {
 	log_level: LogLevel,
+	/// If no file_path is provided, it will search for or create 'log.txt' in the current directory.
+	/// You can set your file_path using set_file_path("your_path").
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
 	file_path: String,
 	#[derivative(Default(value="true"))]
@@ -263,13 +270,13 @@ pub struct FileLogger {
 }
 
 impl LogCommon for ConsoleLogger{
-	// 	/// If you do not specify the level for your logger, the ConsoleLogger will use this function to retrieve the log level defined in the Log system (Struct Log).
+	/// If you do not specify the level for your logger, the ConsoleLogger will use this function to retrieve the log level defined in the Log system (Struct Log).
 	fn get_log_level(&mut self, log_level: LogLevel) {
 		if self.set_flag == false {
 			self.log_level = log_level;
 		}
 	}
-
+	/// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
@@ -315,6 +322,7 @@ impl LogCommon for FileLogger {
 			self.log_level = log_level;
 		}
 	}
+	/// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		let mut file = self.get_log_file();
 		if self.active == true {
@@ -356,6 +364,7 @@ impl LoggingSpec for FileLogger {
 impl ILogging for FileLogger {}
 
 impl FileLogger {
+	// Default 정의를 위한 함수
 	fn default_file_path() -> String {
 		"log.txt".to_string()
 	}
@@ -364,10 +373,11 @@ impl FileLogger {
 		self.file_path = file_path.to_string();
 	}
 
+	// Message 처리시 사용자가 지정한 or default Path에 있는 Log File 찾는 함수
 	fn get_log_file(&self) -> File{
 		let file = OpenOptions::new()
 			.write(true)
-			.append(true)
+			.append(true) // 이어쓰기 허용
 			.create(true)
 			// .truncate(true) // 파일 초기화
 			.open(&self.file_path)
@@ -386,10 +396,12 @@ where
 			self.log_level = log_level;
 		}
 	}
+	/// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				let data: T = self.serializer.serialize_msg(log_message);
+				// process 함수를 동기함수로 사용하기 위해 tokio::task::block_in_place 사용
 				block_in_place(|| {
 					block_on(async {
 						self.middleware.sender(data).await
@@ -428,6 +440,7 @@ impl<T: Debug> ILogging for MiddlewareLogger<T> {}
 
 impl MiddlewareLogger<Vec<u8>> {
 	pub fn default() -> Self {
+		// middleware default 생성을 동기함수로 사용하기 위해 tokio::task::block_in_place 사용
 		let middleware = Rc::new(block_in_place(|| {
 			block_on(async {
 				ZenohMiddleware::default().await
@@ -471,17 +484,30 @@ impl<T> MiddlewareLogger<T> {
     }
 }
 
+#[test]
+fn create_middleware_logger() {
+	let middlware_log = MiddlewareLogger::default();
+	println!("{:?}", middlware_log);
+	let serializer = SerializerFactory::new().capnp_serializer();
+	// 변경 가능
+	let middlware_log = MiddlewareLogger::default().serializer(serializer);
+	println!("{:?}", middlware_log);
+}
+
 #[repr(C)]
 #[derive(Derivative)]
 #[derivative(Debug, Default)]
 pub struct Log {
 	pub log_level: LogLevel,
 	pub log_message: LogMessage,
+	// Custom한 Logger를 대입 후 소유권이 이전 -> 수정이 불가(detach 등의 작업 어려움), 
+	// 수정 가능하도록 Rc<RefCell<..>>로 래핑
 	pub logger: Rc<RefCell<Logger>>,
 }
 
 impl Log {
 	pub fn new(log_level: &str, logger: Rc<RefCell<Logger>>) -> Self {
+		// 사용자로부터 입력 받은 로그 레벨 -> enum 변환
 		let log_level = match log_level {
 			"trace" => Some(LogLevel::Trace),
 			"debug" => Some(LogLevel::Debug),
@@ -492,12 +518,14 @@ impl Log {
 		};
 		let log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 
+		// Logger에 해당 레벨 세팅 (Logger 생성시 세팅 되었을 경우 적용 X)
 		logger.borrow_mut().get_log_level(log_level);
 
 		Log { logger, .. Default::default() }
 	}
 
     pub fn process(&mut self, log_level: LogLevel, msg: String) {
+		// Log Message 생성 후 로거에 전달
 		self.log_message.msg(log_level, msg);
 		self.logger.borrow().process(&self.log_message);
 		self.log_message = LogMessage{..Default::default()}; // Message 초기화
