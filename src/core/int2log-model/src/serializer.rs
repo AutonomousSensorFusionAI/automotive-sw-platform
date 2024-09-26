@@ -25,7 +25,7 @@ impl<T> Serialization<T> for Serializer {
         unimplemented!("Base deserialization not implemented")
     }
 }
-
+// Decorator 패턴 사용
 trait Decorator<T>: Serialization<T> {
     fn new(seiralizer: Rc<dyn Serialization<T>>) -> Self;
 }
@@ -108,14 +108,14 @@ impl Serialization<Vec<u8>> for CapnpSerializer<Vec<u8>>{
 		}
 	}
 }
-
+// Decorator 패턴 사용
 impl Decorator<Vec<u8>> for CapnpSerializer<Vec<u8>> {
     fn new(serializer: Rc<dyn Serialization<Vec<u8>>>) -> Self {
         CapnpSerializer { serializer }
     }
 }
 
-// Serializer Factory
+// Serializer Factory (다른 직렬화 기법 추가하여 사용자가 꺼내쓸 수 있도록 하기 위함)
 pub struct SerializerFactory<T> {
 	base: Rc<dyn Serialization<T>>,
 	capnp_serializer: Rc<CapnpSerializer<T>>,

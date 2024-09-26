@@ -19,7 +19,7 @@ impl LogMessage {
             msg,
             timestamp: Self::get_timestamp(),
             logger: match Self::caller_name() {
-                Some(file) => file,
+                Some(caller_info) => caller_info,
                 None => "Unknown".to_string(),
             }
         }
@@ -30,7 +30,7 @@ impl LogMessage {
         self.msg = msg;
         self.timestamp = Self::get_timestamp();
         self.logger = match Self::caller_name() {
-            Some(file) => file,
+            Some(caller_info) => caller_info,
             None => "Unknown".to_string(),
         };
         self
@@ -42,6 +42,7 @@ impl LogMessage {
         now_format
     }
 
+    // 로그가 발생한 코드 정보 출력(depth 수정해야 할 수 있음)
     #[inline(never)]
     fn caller_name() -> Option<String> {
         let backtrace = Backtrace::new();
