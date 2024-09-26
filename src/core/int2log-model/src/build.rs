@@ -1,5 +1,6 @@
 extern crate capnpc;
 
+// capnp message 빌드
 fn main () {
   capnpc::CompilerCommand::new()
     .output_path("src/")

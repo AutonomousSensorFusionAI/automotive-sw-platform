@@ -11,6 +11,7 @@ pub struct ZenohConfiguration {
 }
 use std::path::PathBuf;
 impl ZenohConfiguration {
+    /// zenoh.json5 config를 읽어오기 위한 함수
     fn load_config_from_file(file_path: &str) -> zenoh::Config {
         let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         config_path.push(file_path);
@@ -23,15 +24,18 @@ impl Default for ZenohConfiguration {
     fn default() -> Self {
         ZenohConfiguration {
             config: ZenohConfiguration::load_config_from_file("zenoh.json5"),
-            pub_key: Some(String::from("log")),
-            sub_key: None,
+            pub_key: Some(String::from("log")), // default key log
+            sub_key: None, // Log 시스템에서 구독자를 사용할 일이 없을 것 같아 따로 정의하지 X
         }
     }
 }
 
+// 빌더 패턴 사용
 #[derive(Default, Debug)]
 pub struct ZenohMiddlewareBuilder {
     config: ZenohConfiguration,
+    // 외부 Arc<Mutex<...>>는 스레드간 이동 안전성 보장을 위해 사용됨
+    // 내부 Arc는 퍼블리셔 혹은 세션을 Clone 하기 위해 사용(소유권 문제 해결)
     session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
     publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>,
     subscriber: Arc<Mutex<Option<zenoh::pubsub::Subscriber<flume::Receiver<zenoh::sample::Sample>>>>>,
@@ -44,10 +48,14 @@ impl ZenohMiddlewareBuilder {
         let publisher = self.publisher.clone();
         let subscriber = self.subscriber.clone();
 
-        thread::spawn(move || { // Log를 사용하는 main 함수에 `.await`가 없어도, tokio::spawn을 쓰면 async main을 사용해야 하는 문제 해결.
+        // 백그라운드에서 제노 세션 생성 (생성되지 않아도 타 로거들이 작동하도록(콘솔, 파일 등))
+        // tokio::spawn은 런타임을 생성하지 않고도 사용 가능하지만,
+        // main 함수에 `.await`가 없어도, async main을 사용해야 함
+        thread::spawn(move || {
             let rt = Runtime::new().unwrap();
-            rt.block_on(async {
+            rt.block_on(async { // .await를 위한 런타임 생성
                 loop {
+                    // 세션 열기에 실패할 경우 loop를 통해 open 시도함.
                     match zenoh::open(config.config.clone()).await {
                         Ok(new_session) => {
                             let new_session = Arc::new(new_session);
@@ -55,11 +63,11 @@ impl ZenohMiddlewareBuilder {
                             let mut session_guard = session.lock().await;
                             *session_guard = Some(new_session.clone());
                             println!("Zenoh session established successfully.");
-
+                            
+                            // ZenohConfiguration에 저장된 pub_key가 있을 경우에만 발행자 생성
                             if let Some(pub_key) = config.pub_key.clone() {   
                                 match session_guard.as_ref().unwrap().declare_publisher(pub_key).await {
                                     Ok(new_pub) => {
-                                        // self = self.publisher(publisher);
                                         let mut publisher_guard = publisher.lock().await;
                                         *publisher_guard = Some(Arc::new(new_pub));
                                         println!("Publisher created successfully.");
@@ -68,6 +76,7 @@ impl ZenohMiddlewareBuilder {
                                 }
                             }
 
+                            // ZenohConfiguration에 저장된 sub_key가 있을 경우에만 구독자 생성
                             if let Some(sub_key) = config.sub_key.clone() {   
                                 match new_session.declare_subscriber(sub_key).await {
                                     Ok(new_sub) => {
@@ -80,6 +89,7 @@ impl ZenohMiddlewareBuilder {
                             }
                             break;
                         }
+                        // Zenoh Session 생성 실패시 에러 발생 -> 5초 후 재시도 
                         Err(e) => {
                             println!("Failed to establish Zenoh session: {:?}. Retrying in 5 seconds...", e);
                             tokio::time::sleep(std::time::Duration::from_secs(5)).await;
@@ -146,13 +156,9 @@ impl Communication<String> for ZenohMiddleware {
 }
 
 impl Communication<Vec<u8>> for ZenohMiddleware{
+    // sender의 반환 타입 관련한 내용은 model의 lib.rs를 참고해주세요.
     fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            // let is_session = self.session.lock().await.as_ref().cloned();
-            // match is_session {
-            //     Some(session) => println!("{:?}", session),
-            //     None => println!("None"),
-            // }
             let publisher_opt = self.publisher.lock().await.as_ref().cloned();
             if let Some(publisher) = publisher_opt {
                 publisher.put(data).await.unwrap();
