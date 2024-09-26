@@ -1,12 +1,15 @@
+use std::{thread, time};
 use int2log_core::*;
-#[tokio::main]
-async fn main() {
+
+
+fn main() {
 	let mut log = Log::default();
+	let one_second = time::Duration::from_secs(1);
 	println!("{:?}", log);
 	
 	loop{
 		log.error("Hi, Error!".to_string());
-		tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+		thread::sleep(one_second);
 	}
 }
 
