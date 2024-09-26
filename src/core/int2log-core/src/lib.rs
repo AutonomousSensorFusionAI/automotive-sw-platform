@@ -37,13 +37,19 @@ use int2log_zenoh::*;
 	그리고 사용자가 로그 레벨을 세팅하지 않은 경우, 
 	기본 로그 시스템의 로그 레벨을 가져올 수 있도록 하는 get_log_level 함수로 이루어져 있습니다.
 */
-pub trait ILogging: Debug {
-	fn get_log_level(&mut self, log_level: LogLevel);
+// This is for public function
+pub trait LoggingSpec: Debug {
 	fn set_log_level(&mut self, log_level: &str);
 	fn set_active_true(&mut self);
 	fn set_active_false(&mut self);
+}
+// This is for hidden function
+trait LogCommon: Debug {
+	fn get_log_level(&mut self, log_level: LogLevel);
 	fn process(&self, log_message: &LogMessage);
 }
+#[allow(private_bounds)]// LogCommon->Hidden은 의도했던 것 => warning 무시
+pub trait ILogging: LoggingSpec + LogCommon {}
 
 /*
 	- ILogger 트레잇 설명
@@ -52,15 +58,19 @@ pub trait ILogging: Debug {
 	또한, get_log_level의 역할은 위 ILogging의 get_log_level 함수와 같습니다.
 	loggers.get_log_level -> inner_logger.get_log_level 호출로 처리하게 됩니다.
 	process 또한 위와 동일합니다.
-
-	attach, detach에서 사용된 'Rc<RefCell<dyn ILogging>>'에 대한 내용은 Logger 구조체에서 같이 다루도록 하겠습니다.
 */
-pub trait ILogger {
+// This is for public function
+pub trait LoggerSpec {
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>);
-	fn get_log_level(&self, log_level: &str);
-	fn process(&self, log_message: &LogMessage);
 }
+// This is for hidden function
+// trait LogCommon {
+// 	fn get_log_level(&self, log_level: LogLevel);
+// 	fn process(&self, log_message: &LogMessage);
+// }
+#[allow(private_bounds)] // LogCommon->Hidden은 의도했던 것 => warning 무시
+pub trait ILogger: LoggerSpec + LogCommon {}
 
 #[cfg(test)]
 mod logger_examples{
@@ -184,32 +194,26 @@ impl Logger {
 	}
 }
 
-impl ILogger for Logger {
+impl LoggerSpec for Logger {
+	/// You can use this function to attach your logger.
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.push(logger);
 	}
+	/// You can use this function to detach your logger.
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
 	}
-	fn get_log_level(&self, log_level: &str) {
-		let log_level = match log_level {
-			"trace" => Some(LogLevel::Trace),
-			"debug" => Some(LogLevel::Debug),
-			"info" => Some(LogLevel::Info),
-			"warn" => Some(LogLevel::Warn),
-			"error" => Some(LogLevel::Error),
-			_ => None,
-		};
-		
-		match log_level {
-			Some(log_level) =>
-				for item in self.loggers.iter() {
-					let mut logger_ref = item.borrow_mut();
-					logger_ref.get_log_level(log_level);
-				},
-			None => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+}
+
+impl LogCommon for Logger {
+	/// If you do not specify the level for your logger, the Logger system will use this function to retrieve the log level defined in the Log system (Struct Log).
+	fn get_log_level(&mut self, log_level: LogLevel) {
+		for item in self.loggers.iter() {
+			let mut logger_ref = item.borrow_mut();
+			logger_ref.get_log_level(log_level);
 		}
 	}
+	/// Processing Log Message. Don't use directly
 	fn process(&self, log_message: &LogMessage) {
 		for item in self.loggers.iter() {
 			let logger_ref = item.borrow();
@@ -217,6 +221,8 @@ impl ILogger for Logger {
 		}
 	}
 }
+
+impl ILogger for Logger {}
 
 /*
 	원래 bool의 Default 타입은 false입니다.
@@ -256,29 +262,14 @@ pub struct FileLogger {
 	set_flag: bool,
 }
 
-impl ILogging for ConsoleLogger {
+impl LogCommon for ConsoleLogger{
+	// 	/// If you do not specify the level for your logger, the ConsoleLogger will use this function to retrieve the log level defined in the Log system (Struct Log).
 	fn get_log_level(&mut self, log_level: LogLevel) {
 		if self.set_flag == false {
 			self.log_level = log_level;
 		}
 	}
-	fn set_log_level(&mut self, log_level: &str) {
-		self.set_flag = true;
-		match log_level {
-			"trace" => self.log_level = LogLevel::Trace,
-			"debug" => self.log_level = LogLevel::Debug,
-			"info" => self.log_level = LogLevel::Info,
-			"warn" => self.log_level = LogLevel::Warn,
-			"error" => self.log_level = LogLevel::Error,
-			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
-		}
-	}
-	fn set_active_true(&mut self) {
-		self.active = true;
-	}
-	fn set_active_false(&mut self) {
-		self.active = false;
-	}
+
 	fn process(&self, log_message: &LogMessage) {
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
@@ -293,13 +284,8 @@ impl ILogging for ConsoleLogger {
 		}
 	}
 }
-
-impl ILogging for FileLogger {
-	fn get_log_level(&mut self, log_level: LogLevel) {
-		if self.set_flag == false {
-			self.log_level = log_level;
-		}
-	}
+impl LoggingSpec for ConsoleLogger {
+	/// You can set the log level like logger.set_log_level("trace").
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		match log_level {
@@ -311,11 +297,23 @@ impl ILogging for FileLogger {
 			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
 		}
 	}
+	/// You can set the active true like logger.set_active_true().
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
+	/// You can set the active false like logger.set_active_false().
 	fn set_active_false(&mut self) {
 		self.active = false;
+	}
+}
+impl ILogging for ConsoleLogger {}
+
+impl LogCommon for FileLogger {
+	/// If you do not specify the level for your logger, the FileLogger will use this function to retrieve the log level defined in the Log system (Struct Log).
+	fn get_log_level(&mut self, log_level: LogLevel) {
+		if self.set_flag == false {
+			self.log_level = log_level;
+		}
 	}
 	fn process(&self, log_message: &LogMessage) {
 		let mut file = self.get_log_file();
@@ -333,6 +331,29 @@ impl ILogging for FileLogger {
 		}
 	}
 }
+impl LoggingSpec for FileLogger {
+	/// You can set the log level like logger.set_log_level("trace").
+	fn set_log_level(&mut self, log_level: &str) {
+		self.set_flag = true;
+		match log_level {
+			"trace" => self.log_level = LogLevel::Trace,
+			"debug" => self.log_level = LogLevel::Debug,
+			"info" => self.log_level = LogLevel::Info,
+			"warn" => self.log_level = LogLevel::Warn,
+			"error" => self.log_level = LogLevel::Error,
+			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+		}
+	}
+	/// You can set the active true like logger.set_active_true().
+	fn set_active_true(&mut self) {
+		self.active = true;
+	}
+	/// You can set the active false like logger.set_active_false().
+	fn set_active_false(&mut self) {
+		self.active = false;
+	}
+}
+impl ILogging for FileLogger {}
 
 impl FileLogger {
 	fn default_file_path() -> String {
@@ -355,31 +376,15 @@ impl FileLogger {
 	}
 }
 
-impl<T> ILogging for MiddlewareLogger<T> 
+impl<T> LogCommon for MiddlewareLogger<T> 
 where
 	T: Debug,
 {
+	/// If you do not specify the level for your logger, the MiddlewareLogger will use this function to retrieve the log level defined in the Log system (Struct Log).
 	fn get_log_level(&mut self, log_level: LogLevel) {
 		if self.set_flag == false {
 			self.log_level = log_level;
 		}
-	}
-	fn set_log_level(&mut self, log_level: &str) {
-		self.set_flag = true;
-		match log_level {
-			"trace" => self.log_level = LogLevel::Trace,
-			"debug" => self.log_level = LogLevel::Debug,
-			"info" => self.log_level = LogLevel::Info,
-			"warn" => self.log_level = LogLevel::Warn,
-			"error" => self.log_level = LogLevel::Error,
-			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
-		}
-	}
-	fn set_active_true(&mut self) {
-		self.active = true;
-	}
-	fn set_active_false(&mut self) {
-		self.active = false;
 	}
 	fn process(&self, log_message: &LogMessage) {
 		if self.active == true {
@@ -394,6 +399,32 @@ where
 		}
 	}
 }
+impl<T> LoggingSpec for MiddlewareLogger<T> 
+where
+	T: Debug,
+{
+	/// You can set the log level like logger.set_log_level("trace").
+	fn set_log_level(&mut self, log_level: &str) {
+		self.set_flag = true;
+		match log_level {
+			"trace" => self.log_level = LogLevel::Trace,
+			"debug" => self.log_level = LogLevel::Debug,
+			"info" => self.log_level = LogLevel::Info,
+			"warn" => self.log_level = LogLevel::Warn,
+			"error" => self.log_level = LogLevel::Error,
+			_ => println!("To choose between 'trace', 'debug', 'info', 'warn', and 'error'"),
+		}
+	}
+	/// You can set the active true like logger.set_active_true().
+	fn set_active_true(&mut self) {
+		self.active = true;
+	}
+	/// You can set the active false like logger.set_active_false().
+	fn set_active_false(&mut self) {
+		self.active = false;
+	}
+}
+impl<T: Debug> ILogging for MiddlewareLogger<T> {}
 
 impl MiddlewareLogger<Vec<u8>> {
 	pub fn default() -> Self {
@@ -446,18 +477,29 @@ impl<T> MiddlewareLogger<T> {
 pub struct Log {
 	pub log_level: LogLevel,
 	pub log_message: LogMessage,
-	pub logger: Logger,
+	pub logger: Rc<RefCell<Logger>>,
 }
 
 impl Log {
-	pub fn new(log_level: &str, logger: Logger) -> Self {
-		logger.get_log_level(log_level);
+	pub fn new(log_level: &str, logger: Rc<RefCell<Logger>>) -> Self {
+		let log_level = match log_level {
+			"trace" => Some(LogLevel::Trace),
+			"debug" => Some(LogLevel::Debug),
+			"info" => Some(LogLevel::Info),
+			"warn" => Some(LogLevel::Warn),
+			"error" => Some(LogLevel::Error),
+			_ => None,
+		};
+		let log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
+
+		logger.borrow_mut().get_log_level(log_level);
+
 		Log { logger, .. Default::default() }
 	}
 
     pub fn process(&mut self, log_level: LogLevel, msg: String) {
 		self.log_message.msg(log_level, msg);
-		self.logger.process(&self.log_message);
+		self.logger.borrow().process(&self.log_message);
 		self.log_message = LogMessage{..Default::default()}; // Message 초기화
 	}
 
@@ -488,7 +530,7 @@ mod tests {
 
 	#[test]
 	fn logger_works() {
-		let mut logger = Logger::new();
+		let mut logger = Rc::new(RefCell::new(Logger::new()));
 		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger {
 			active: false,
@@ -497,26 +539,26 @@ mod tests {
 		let file_logger = Rc::new(RefCell::new(FileLogger {..Default::default()}));
 		console_logger_b.borrow_mut().set_log_level("error");
 		let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
-		logger.attach(console_logger_a.clone());
-		logger.attach(console_logger_b.clone());
-		logger.attach(file_logger.clone());
-		logger.attach(middleware);
+		logger.borrow_mut().attach(console_logger_a.clone());
+		logger.borrow_mut().attach(console_logger_b.clone());
+		logger.borrow_mut().attach(file_logger.clone());
+		logger.borrow_mut().attach(middleware);
 		println!("{:?}", logger);
 
-		logger.detach(console_logger_a.clone());
+		logger.borrow_mut().detach(console_logger_a.clone());
 		println!("{:?}", logger);
-		logger.attach(console_logger_a.clone());
+		logger.borrow_mut().attach(console_logger_a.clone());
 		console_logger_b.borrow_mut().set_active_true();
 		println!("{:?}", logger);
 		
 		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
-		logger.process(&log_message);
+		logger.borrow_mut().process(&log_message);
 	}
 
 	#[test]
 	fn log_works() {
 		let mut log = Log::default();
-		let my_console = log.logger.default_console();
+		let my_console = log.logger.borrow().default_console();
 		my_console.borrow_mut().set_log_level("error");
 		println!("{:?}", log);
 		log.error("Hi, Error!".to_string());
@@ -524,18 +566,21 @@ mod tests {
 
 	#[test]
 	fn custom_log_works() {
-		let mut logger = Logger::new();
+		let logger = Rc::new(RefCell::new(Logger::new()));
 		let console_logger_a = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let console_logger_b = Rc::new(RefCell::new(ConsoleLogger::default()));
 		let file_logger = Rc::new(RefCell::new(FileLogger::default()));
 		console_logger_b.borrow_mut().set_log_level("error");
 		let middleware = Rc::new(RefCell::new(MiddlewareLogger::default()));
-		logger.attach(console_logger_a.clone());
-		logger.attach(console_logger_b.clone());
-		logger.attach(file_logger.clone());
-		logger.attach(middleware.clone());
+		logger.borrow_mut().attach(console_logger_a.clone());
+		logger.borrow_mut().attach(console_logger_b.clone());
+		logger.borrow_mut().attach(file_logger.clone());
+		logger.borrow_mut().attach(middleware.clone());
 		// let mut log = Log::default();
-		let mut log = Log::new("debug", logger);
+		let mut log = Log::new("debug", logger.clone());
+		println!("{:?}", log);
+		log.error("Hi, Error!".to_string());
+		logger.borrow_mut().detach(console_logger_b);
 		println!("{:?}", log);
 		log.error("Hi, Error!".to_string());
 	}
