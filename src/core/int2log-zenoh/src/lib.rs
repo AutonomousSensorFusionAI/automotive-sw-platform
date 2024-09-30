@@ -1,3 +1,47 @@
+//! `int2log-zenoh` is the Zenoh middleware library for Int2Log's logging systems.
+//! It publishes log messages locally or to the cloud, depending on the user's configuration, using the Zenoh protocol.
+//! Zenoh can be configured through the `zenoh.json5` file included in the crate.
+
+//! # Examples
+//! ### Publishing Data Using Default Value
+//! The example below shows how to produce a value
+//! ```
+//! use int2log_zenoh::*;
+//! use int2log_model::Communication; // this required to use the sender function from Communication trait
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//!     let middleware = ZenohMiddleware::default().await;
+//!     std::thread::sleep(std::time::Duration::from_secs(10)); // Waiting for Opening Session
+//!     middleware.sender(String::from("Hi! It's me!")).await;
+//! }
+//! ```
+//! 
+//! ### Custom
+//! The example below shows how to custom ZenohMiddleware.
+//! ```
+//! use int2log_zenoh::*;
+//! use int2log_model::Communication; // this required to use the sender function from Communication trait
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//!     /*
+//!         let zenoh_config = ZenohConfiguration{
+//!             config: Default::default(),
+//!             pub_key: Some(String::from("log")),
+//!             sub_key: Some(String::from("log")),
+//!         };
+//!      */
+//!     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log".to_string());
+//!     let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
+//!     std::thread::sleep(std::time::Duration::from_secs(10)); // Waiting for Opening Session
+//!     middleware.sender(String::from("Hi! It's me!")).await;
+//!     // receiver() is Subscriber's Callback function. 
+//!     // You will get `[Subscriber] Received PUT ('log': 'Hi! It's me!')`.
+//!     middleware.receiver().await; 
+//! }
+//! ```
+
 use int2log_model::*;
 use std::{sync::Arc, future::Future, pin::Pin, thread};
 use tokio::{sync::Mutex, runtime::Runtime};
@@ -215,11 +259,11 @@ mod tests {
         // let middleware_default = ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap();
         // // println!("{:?}", middleware_default);
 
-        // let zenoh_config = ZenohConfiguration{
-        //     config: Default::default(),
-        //     pub_key: Some(String::from("log")),
-        //     sub_key: Some(String::from("log")),
-        // };
+        let zenoh_config = ZenohConfiguration{
+            config: Default::default(),
+            pub_key: Some(String::from("log")),
+            sub_key: Some(String::from("log")),
+        };
         let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log".to_string());
         let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
         // let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
@@ -232,13 +276,5 @@ mod tests {
         middleware.receiver().await;
         middleware.sender(payload_2).await;
         middleware.receiver().await;
-
-        // thread::sleep(std::time::Duration::from_secs(10));
-        // loop {
-        //     thread::sleep(std::time::Duration::from_secs(10));
-        // }
-        // join!()
-        // let config = load_config_from_file("zenoh.json5");
-        // println!("{:?}", config);
     }
 }
