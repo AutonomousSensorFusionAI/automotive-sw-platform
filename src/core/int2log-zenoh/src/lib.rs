@@ -5,8 +5,11 @@ use tokio::{sync::Mutex, runtime::Runtime};
 
 #[derive(Debug, Clone)]
 pub struct ZenohConfiguration {
+    /// Reading `zenoh.json5` Zenoh Configuration file in int2log-zenoh dir
     pub config: zenoh::Config,
+    /// Default: Some(log)
     pub pub_key: Option<String>,
+    /// Default: None
     pub sub_key: Option<String>,
 }
 use std::path::PathBuf;
@@ -38,7 +41,7 @@ impl Default for ZenohConfiguration {
 // 빌더 패턴 사용
 #[derive(Default, Debug)]
 pub struct ZenohMiddlewareBuilder {
-    config: ZenohConfiguration,
+    pub config: ZenohConfiguration,
     // 외부 Arc<Mutex<...>>는 스레드간 이동 안전성 보장을 위해 사용됨
     // 내부 Arc는 퍼블리셔 혹은 세션을 Clone 하기 위해 사용(소유권 문제 해결)
     session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
@@ -47,11 +50,12 @@ pub struct ZenohMiddlewareBuilder {
 }
 
 impl ZenohMiddlewareBuilder {
+    /// You can use this when you want to set your pub/sub key
     pub fn config(mut self, config: ZenohConfiguration) -> Self {
         self.config = config;
         self
     }
-
+    /// Builder pattern
     pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         let config = self.config.clone();
         let session = self.session.clone();
@@ -141,7 +145,6 @@ impl ZenohMiddleware {
     }
 
     pub async fn default() -> Self{
-        // ZenohMiddlewareBuilder::default().config().await.build().await.unwrap()
         ZenohMiddlewareBuilder::default().build().await.unwrap()
     }
 }
