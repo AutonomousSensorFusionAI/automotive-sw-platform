@@ -125,10 +125,10 @@ mod logger_examples{
 	자세한 내용: https://doc.rust-kr.org/ch15-05-interior-mutability.html
 */
 #[derive(Debug)]
-/// Logger 집합 구조체
+/// A Logger struct that combines multiple loggers like File Logger, Console Logger, and Middleware Logger.
 pub struct Logger {
 	/// It is a collection of either default-defined or user-defined loggers that implement the ILogging interface.
-	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
+	pub loggers: Vec<Rc<RefCell<dyn ILogging>>>,
 	/// The field exists or is None only when defined as the default.
 	default_console: Option<Rc<RefCell<ConsoleLogger>>>,
 	/// The field exists or is None only when defined as the default.
@@ -144,7 +144,7 @@ pub struct Logger {
 
 	편의를 위해 다른 로거들(콘솔, 파일, 미들웨어)을 정의하지 않고도 기본으로 사용할 수 있도록 Default 트레잇을 따로 정의하였습니다.
  */
-/// Logger에 ConsoleLogger, FileLogger, MiddlewareLogger(Zenoh) 집합 등록
+/// This function would automatically register the File Logger, Console Logger, and Middleware Logger as defaults.
 impl Default for Logger {
 	fn default() -> Self {
 		let mut logger = Logger::new();
@@ -173,22 +173,22 @@ impl Logger {
 	}
 
 	/// Note that it is only available when defined as the default.
-	/// Return type: (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>)
+	/// Return type: `(Rc<RefCell<ConsoleLogger>>`, `Rc<RefCell<FileLogger>>`, `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`)
 	pub fn get_default_logger(&self) -> (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>) {
 		(self.default_console(), self.default_file(), self.default_middeleware())
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<ConsoleLogger>>
+	/// Retrun type: `Rc<RefCell<ConsoleLogger>>`
 	pub fn default_console(&self) -> Rc<RefCell<ConsoleLogger>> {
 		self.default_console.clone().expect("You don't have Default Console Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<FileLogger>>
+	/// Retrun type: `Rc<RefCell<FileLogger>>`
 	pub fn default_file(&self) -> Rc<RefCell<FileLogger>> {
 		self.default_file.clone().expect("You don't have Default File Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<MiddlewareLogger<Vec<u8>>>>
+	/// Retrun type: `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`
 	pub fn default_middeleware(&self) -> Rc<RefCell<MiddlewareLogger<Vec<u8>>>> {
 		self.default_middeleware.clone().expect("You don't have Default Middleware Logger. Please check if you defined the Logger using the default function.")
 	}
@@ -231,41 +231,43 @@ impl ILogger for Logger {}
 */
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
-/// Console Logger
+/// Logger for console output
 pub struct ConsoleLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
-/// Middleware Logger
-/// Default Middleware is Zenoh
+/// Logger for Middleware (Pub/Sub)
 pub struct MiddlewareLogger<T> 
 {	
 	// 여러 MiddlewareLogger 인스턴스가 동일한 middleware나 serializer를 참조할 수 있도록 Rc로 래핑.
 	// 해당 트레잇을 구현하는 타입만 필드로 저장할 수 있도록 동적 디스패치 사용
-	middleware: Rc<dyn Communication<T>>,
-	serializer: Rc<dyn Serialization<T>>,
-	log_level: LogLevel,
+	/// Default Middleware: Zenoh
+	pub middleware: Rc<dyn Communication<T>>,
+	/// Default Serializer: Capn'Proto
+	pub serializer: Rc<dyn Serialization<T>>,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 	_phantom: PhantomData<T>, // T를 위해 정의된 필드.
 }
 
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
+/// Logger for File Output
 pub struct FileLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	/// If no file_path is provided, it will search for or create 'log.txt' in the current directory.
 	/// You can set your file_path using set_file_path("your_path").
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
-	file_path: String,
+	pub file_path: String,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 }
 
@@ -444,6 +446,7 @@ impl<T> MiddlewareLogger<T> {
 			_phantom: Default::default(),
 		}
 	}
+	/// You can set your serializer instead of default serializer (capn')
 	pub fn serializer(self, serializer: Rc<dyn Serialization<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
@@ -454,6 +457,7 @@ impl<T> MiddlewareLogger<T> {
 			_phantom: Default::default(),
 		}
     }
+	/// You can set your middleware instead of default middleware (Zenoh)
 	pub fn middleware(self, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
@@ -479,6 +483,7 @@ fn create_middleware_logger() {
 #[repr(C)]
 #[derive(Derivative)]
 #[derivative(Debug, Default)]
+/// Log System
 pub struct Log {
 	pub log_level: LogLevel,
 	pub log_message: LogMessage,

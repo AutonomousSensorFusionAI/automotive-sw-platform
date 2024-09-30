@@ -29,38 +29,9 @@ pub trait Communication<T>: fmt::Debug {
 		Box<dyn>을 사용하여 트레잇이 object safe하도록 수정하고,
 		Pin과 Send로 안전성을 보장하였습니다.
 	*/
+	/// function of publish
 	fn sender(&self, t: T) -> Pin<Box<dyn Future<Output = ()> + Send + '_>>;
 }
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct DefaultMiddleware;
-
-impl Default for DefaultMiddleware {
-    fn default() -> Self {
-		DefaultMiddleware // DefaultMiddleware에 대한 기본 구현
-    }
-}
-
-impl DefaultMiddleware {
-	async fn receiver(&self) {
-		unimplemented!("You need to implement function the receiver function of Middleware.");
-	}
-}
-
-impl Communication<String> for DefaultMiddleware {
-	fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {}", &data);
-	}
-}
-
-impl Communication<Vec<u8>> for DefaultMiddleware {
-	fn sender(&self, data: Vec<u8>) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-		unimplemented!("You need to implement function the sender function of Middleware. Your Data is {:?}", &data);
-	}
-}
-
-
 
 #[cfg(test)]
 mod tests {

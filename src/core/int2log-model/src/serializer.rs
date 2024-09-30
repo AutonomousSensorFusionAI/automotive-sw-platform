@@ -14,7 +14,8 @@ pub trait Serialization<T>: fmt::Debug {
 
 #[derive(Derivative)]
 #[derivative(Debug)]
-pub struct Serializer {}
+/// Decorator For Serializer
+struct Serializer {}
 
 impl<T> Serialization<T> for Serializer {
     fn serialize_msg(&self, _msg: &LogMessage) -> T {
@@ -25,7 +26,7 @@ impl<T> Serialization<T> for Serializer {
         unimplemented!("Base deserialization not implemented")
     }
 }
-// Decorator 패턴 사용
+// Decorator Pattern
 trait Decorator<T>: Serialization<T> {
     fn new(seiralizer: Rc<dyn Serialization<T>>) -> Self;
 }
@@ -115,13 +116,15 @@ impl Decorator<Vec<u8>> for CapnpSerializer<Vec<u8>> {
     }
 }
 
-// Serializer Factory (다른 직렬화 기법 추가하여 사용자가 꺼내쓸 수 있도록 하기 위함)
+// Serializer Factory (여러 직렬화 기법을 사용자가 꺼내쓸 수 있도록 하기 위함)
+/// Serializer Factory
 pub struct SerializerFactory<T> {
 	base: Rc<dyn Serialization<T>>,
 	capnp_serializer: Rc<CapnpSerializer<T>>,
 }
 
 impl SerializerFactory<Vec<u8>> {
+	/// Create SerializerFactory
 	pub fn new() -> Self {
 		let base: Rc<Serializer> = Rc::new(Serializer {});
 		let capnp_serializer: Rc<CapnpSerializer<Vec<u8>>> = Rc::new(CapnpSerializer::new(base.clone()));
@@ -131,6 +134,7 @@ impl SerializerFactory<Vec<u8>> {
 		}
 	}
 
+	/// Get Capn'Proto Serializer
 	pub fn capnp_serializer(&self) -> Rc<CapnpSerializer<Vec<u8>>> {
 		Rc::clone(&self.capnp_serializer)
 	}
