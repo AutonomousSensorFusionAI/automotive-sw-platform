@@ -47,7 +47,12 @@ pub struct ZenohMiddlewareBuilder {
 }
 
 impl ZenohMiddlewareBuilder {
-    pub async fn config(mut self) -> Self{
+    pub fn config(mut self, config: ZenohConfiguration) -> Self {
+        self.config = config;
+        self
+    }
+
+    pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         let config = self.config.clone();
         let session = self.session.clone();
         let publisher = self.publisher.clone();
@@ -103,10 +108,6 @@ impl ZenohMiddlewareBuilder {
                 }
             })
         });
-        self
-    }
-
-    pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         Ok(ZenohMiddleware::new(
             self.config,
             self.session,
@@ -212,18 +213,28 @@ mod tests {
         // // println!("{:?}", middleware_default);
 
         // let zenoh_config = ZenohConfiguration{
-        //     config: default(),
-        //     pub_key: Some(String::from("topic/test")),
-        //     sub_key: Some(String::from("topic/test")),
+        //     config: Default::default(),
+        //     pub_key: Some(String::from("log")),
+        //     sub_key: Some(String::from("log")),
         // };
+        let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log".to_string());
+        let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
         // let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
-        let middleware = ZenohMiddleware::default().await;
+        // let middleware = ZenohMiddleware::default().await;
+        thread::sleep(std::time::Duration::from_secs(10));
+
         let payload_1 = String::from("Hi! It's me!");
         let payload_2: String = String::from("Hi! It's me!!");
         middleware.sender(payload_1).await;
         middleware.receiver().await;
         middleware.sender(payload_2).await;
         middleware.receiver().await;
+
+        // thread::sleep(std::time::Duration::from_secs(10));
+        // loop {
+        //     thread::sleep(std::time::Duration::from_secs(10));
+        // }
+        // join!()
         // let config = load_config_from_file("zenoh.json5");
         // println!("{:?}", config);
     }
