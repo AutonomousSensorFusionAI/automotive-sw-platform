@@ -69,11 +69,11 @@ pub mod log_message {
       ::core::convert::TryInto::try_into(self.reader.get_data_field::<u16>(0))
     }
     #[inline]
-    pub fn get_msg(self) -> ::capnp::Result<::capnp::text::Reader<'a>> {
+    pub fn get_data(self) -> ::capnp::Result<::capnp::text::Reader<'a>> {
       ::capnp::traits::FromPointerReader::get_from_pointer(&self.reader.get_pointer_field(0), ::core::option::Option::None)
     }
     #[inline]
-    pub fn has_msg(&self) -> bool {
+    pub fn has_data(&self) -> bool {
       !self.reader.get_pointer_field(0).is_null()
     }
     #[inline]
@@ -155,19 +155,19 @@ pub mod log_message {
       self.builder.set_data_field::<u16>(0, value as u16);
     }
     #[inline]
-    pub fn get_msg(self) -> ::capnp::Result<::capnp::text::Builder<'a>> {
+    pub fn get_data(self) -> ::capnp::Result<::capnp::text::Builder<'a>> {
       ::capnp::traits::FromPointerBuilder::get_from_pointer(self.builder.get_pointer_field(0), ::core::option::Option::None)
     }
     #[inline]
-    pub fn set_msg(&mut self, value: impl ::capnp::traits::SetterInput<::capnp::text::Owned>)  {
+    pub fn set_data(&mut self, value: impl ::capnp::traits::SetterInput<::capnp::text::Owned>)  {
       ::capnp::traits::SetterInput::set_pointer_builder(self.builder.reborrow().get_pointer_field(0), value, false).unwrap()
     }
     #[inline]
-    pub fn init_msg(self, size: u32) -> ::capnp::text::Builder<'a> {
+    pub fn init_data(self, size: u32) -> ::capnp::text::Builder<'a> {
       self.builder.get_pointer_field(0).init_text(size)
     }
     #[inline]
-    pub fn has_msg(&self) -> bool {
+    pub fn has_data(&self) -> bool {
       !self.builder.is_pointer_field_null(0)
     }
     #[inline]
@@ -246,7 +246,7 @@ pub mod log_message {
       ::capnp::word(1, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(0, 0, 1, 0, 1, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
-      ::capnp::word(105, 0, 0, 0, 34, 0, 0, 0),
+      ::capnp::word(105, 0, 0, 0, 42, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(100, 0, 0, 0, 3, 0, 1, 0),
       ::capnp::word(112, 0, 0, 0, 2, 0, 1, 0),
@@ -273,7 +273,7 @@ pub mod log_message {
       ::capnp::word(15, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
-      ::capnp::word(109, 115, 103, 0, 0, 0, 0, 0),
+      ::capnp::word(100, 97, 116, 97, 0, 0, 0, 0),
       ::capnp::word(12, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
       ::capnp::word(0, 0, 0, 0, 0, 0, 0, 0),
@@ -319,7 +319,7 @@ pub mod log_message {
     };
     pub static NONUNION_MEMBERS : &[u16] = &[0,1,2,3];
     pub static MEMBERS_BY_DISCRIMINANT : &[u16] = &[];
-    pub static MEMBERS_BY_NAME : &[u16] = &[0,3,1,2];
+    pub static MEMBERS_BY_NAME : &[u16] = &[1,0,3,2];
     pub const TYPE_ID: u64 = 0xc31a_e784_fbc5_5900;
   }
 

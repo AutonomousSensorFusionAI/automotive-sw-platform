@@ -79,7 +79,7 @@ impl Serialization<Vec<u8>> for CapnpSerializer<Vec<u8>>{
 		let mut log_msg: log_message_capnp::log_message::Builder = message.init_root::<log_message_capnp::log_message::Builder>();
 		let rust_log_level: log_level::LogLevel = log_message.log_level.clone();
 		let log_level: log_message_capnp::log_message::LogLevel = rust_log_level.into();
-		log_msg.set_msg(&log_message.msg);
+		log_msg.set_data(&log_message.data);
 		log_msg.set_log_level(log_level);
 		log_msg.set_timestamp(&log_message.timestamp);
 		log_msg.set_logger(&log_message.logger);
@@ -95,14 +95,14 @@ impl Serialization<Vec<u8>> for CapnpSerializer<Vec<u8>>{
 		).unwrap();
 	
 		let log_msg: log_message_capnp::log_message::Reader = reader.get_root::<log_message_capnp::log_message::Reader>().unwrap();
-		let msg: String = log_msg.get_msg().unwrap().to_string().unwrap();
+		let data: String = log_msg.get_data().unwrap().to_string().unwrap();
 		let capnp_log_level: log_message_capnp::log_message::LogLevel = log_msg.get_log_level().unwrap();
 		let log_level: log_level::LogLevel = capnp_log_level.into();
 		let timestamp: String = log_msg.get_timestamp().unwrap().to_string().unwrap();
 		let logger: String = log_msg.get_logger().unwrap().to_string().unwrap();
 		log_message::LogMessage {
 			log_level,
-			msg,
+			data,
 			timestamp,
 			logger,
 		}

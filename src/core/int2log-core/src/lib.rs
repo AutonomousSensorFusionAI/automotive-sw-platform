@@ -281,11 +281,11 @@ impl LogCommon for ConsoleLogger{
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				match log_message.log_level { 
-					LogLevel::Trace => println!("{} - Trace - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Debug => println!("{} - Debug - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Info => println!("{} - Info - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Warn => println!("{} - Warn - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Error => println!("{} - Error - {}", log_message.timestamp, &log_message.msg),
+					LogLevel::Trace => println!("{} - Trace - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Debug => println!("{} - Debug - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Info => println!("{} - Info - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Warn => println!("{} - Warn - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Error => println!("{} - Error - {}", log_message.timestamp, &log_message.data),
 				}
 			}
 		}
@@ -322,11 +322,11 @@ impl LogCommon for FileLogger {
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				let log_entry = match log_message.log_level {
-					LogLevel::Trace => format!("{} - Trace - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Debug => format!("{} - Debug - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Info => format!("{} - Info - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Warn => format!("{} - Warn - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Error => format!("{} - Error - {} \n", log_message.timestamp, &log_message.msg),
+					LogLevel::Trace => format!("{} - Trace - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Debug => format!("{} - Debug - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Info => format!("{} - Info - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Warn => format!("{} - Warn - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Error => format!("{} - Error - {} \n", log_message.timestamp, &log_message.data),
 				};
 				file.write_all(log_entry.as_bytes()).expect("Failed to write log file");
 			}
@@ -499,7 +499,7 @@ impl Log {
 		Log { logger, .. Default::default() }
 	}
 
-    pub fn process(&mut self, log_level: LogLevel, msg: String) {
+    fn process(&mut self, log_level: LogLevel, msg: String) {
 		// Log Message 생성 후 로거에 전달
 		self.log_message.msg(log_level, msg);
 		self.logger.borrow().process(&self.log_message);
@@ -554,7 +554,9 @@ mod tests {
 		console_logger_b.borrow_mut().set_active_true();
 		println!("{:?}", logger);
 		
-		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
+		let mut log_message = LogMessage::default();
+		log_message.msg(LogLevel::Error, "Hi im error".to_string());
+		println!("{:?}", &log_message);
 		logger.borrow_mut().process(&log_message);
 	}
 
