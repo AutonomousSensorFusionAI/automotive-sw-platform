@@ -18,6 +18,11 @@ impl ZenohConfiguration {
         let config = zenoh::Config::from_file(config_path).expect("Failed to load configuration file");
         config
     }
+
+    pub fn set_subscriber_key(mut self, sub_key: String) -> Self{
+        self.sub_key = Some(sub_key);
+        self
+    }
 }
 
 impl Default for ZenohConfiguration {
@@ -111,7 +116,7 @@ impl ZenohMiddlewareBuilder {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ZenohMiddleware {
     pub config: ZenohConfiguration,
     pub session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
@@ -135,18 +140,14 @@ impl ZenohMiddleware {
     }
 
     pub async fn default() -> Self{
-        ZenohMiddlewareBuilder::default().config().await.build().await.unwrap()
+        // ZenohMiddlewareBuilder::default().config().await.build().await.unwrap()
+        ZenohMiddlewareBuilder::default().build().await.unwrap()
     }
 }
 
 impl Communication<String> for ZenohMiddleware {
     fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            let what = self.session.lock().await.as_ref().cloned();
-            match what {
-                Some(_) => println!("Some!"),
-                None => println!("None"),
-            }
             let publisher_opt = self.publisher.lock().await.as_ref().cloned();
             if let Some(publisher) = publisher_opt {
                 publisher.put(data).await.unwrap();
@@ -198,6 +199,11 @@ impl ZenohMiddleware {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::{
+        task::block_in_place,
+    };
+    use futures::executor::block_on;
+    use std::rc::Rc;
 
     // #[tokio::test]
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
