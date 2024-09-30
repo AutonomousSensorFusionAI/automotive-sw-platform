@@ -13,10 +13,13 @@ pub struct LogMessage {
 }
 
 impl LogMessage {
-    pub fn new(log_level: LogLevel, data: String) -> Self {
+    pub fn new<T>(log_level: LogLevel, data: T) -> Self 
+    where
+        T: Into<String>,
+    {
         LogMessage {
             log_level,
-            data,
+            data: data.into(),
             timestamp: Self::get_timestamp(),
             logger: match Self::caller_name() {
                 Some(caller_info) => caller_info,
