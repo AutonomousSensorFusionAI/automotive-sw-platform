@@ -721,14 +721,18 @@ impl Log {
 		// Logger에 해당 레벨 세팅 (Logger 생성시 세팅 되었을 경우 적용 X)
 		logger.borrow_mut().get_log_level(log_level);
 
-		Log { logger, .. Default::default() }
+		Log { 
+			logger: logger.clone(),
+			log_level,
+			log_message: LogMessage::default(),
+		}
 	}
 
     fn process(&mut self, log_level: LogLevel, msg: String) {
 		// Log Message 생성 후 로거에 전달
 		self.log_message.msg(log_level, msg);
 		self.logger.borrow().process(&self.log_message);
-		self.log_message = LogMessage{..Default::default()}; // Message 초기화
+		self.log_message = LogMessage::default(); // Message 초기화
 	}
 
     pub fn trace(&mut self, msg: String) {
