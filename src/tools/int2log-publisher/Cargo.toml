@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tokio = { version = "1", features = ["full"] }
+int2log-core = { path = "../../core/int2log-core" }
+int2log-model ={ path = "../../core/int2log-model" }
+int2log-zenoh ={ path = "../../core/int2log-zenoh" }
+
