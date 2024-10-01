@@ -1,3 +1,29 @@
+//! `int2log-model` is a model library for for Int2Log's logging systems.
+//! It defines traits, serialization models, log levels, and log messages used in the logging system.
+//! 
+//! # Examples
+//! ### Using Capn'Proto Serializer
+//! The example below shows how to use serailzer model
+//! ```
+//! use int2log_model::{
+//!		serializer::*,
+//!		log_message::*,
+//! 	log_level::*,
+//!	};
+//! 
+//! fn main() {
+//! 	let serializer_factory = SerializerFactory::new();
+//!		let capnp_serializer = serializer_factory.capnp_serializer();
+//!		
+//! 	let mut log_message = LogMessage::default();
+//! 	log_message.msg(LogLevel::Info, "This is Info");
+//! 
+//! 	let ser_msg = capnp_serializer.serialize_msg(&log_message);
+//! 	println!("Capnp Serializer: {:?}, Serialized Data is {:?}", capnp_serializer, ser_msg);	
+//! 
+//! }
+//! ```
+
 use std::future::Future;
 use std::pin::Pin;
 use std::fmt;
@@ -29,7 +55,7 @@ pub trait Communication<T>: fmt::Debug {
 		Box<dyn>을 사용하여 트레잇이 object safe하도록 수정하고,
 		Pin과 Send로 안전성을 보장하였습니다.
 	*/
-	/// function of publish
+	/// The publish function of the middleware publisher
 	fn sender(&self, t: T) -> Pin<Box<dyn Future<Output = ()> + Send + '_>>;
 }
 

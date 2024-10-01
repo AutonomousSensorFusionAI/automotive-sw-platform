@@ -125,6 +125,14 @@ pub struct SerializerFactory<T> {
 
 impl SerializerFactory<Vec<u8>> {
 	/// Create SerializerFactory
+	/// # Example
+	/// ```
+	/// use int2log_model::serializer::*;
+	/// 
+	/// fn main() {
+	/// 	let serializer_factory: SerializerFactory<Vec<u8>> = SerializerFactory::new();
+	/// }
+	/// ```
 	pub fn new() -> Self {
 		let base: Rc<Serializer> = Rc::new(Serializer {});
 		let capnp_serializer: Rc<CapnpSerializer<Vec<u8>>> = Rc::new(CapnpSerializer::new(base.clone()));
@@ -135,6 +143,15 @@ impl SerializerFactory<Vec<u8>> {
 	}
 
 	/// Get Capn'Proto Serializer
+	/// # Example
+	/// ```
+	/// use int2log_model::serializer::*;
+	/// 
+	/// fn main() {
+	/// 	let serializer_factory: SerializerFactory<Vec<u8>> = SerializerFactory::new();
+	///		let capnp_serializer = serializer_factory.capnp_serializer();
+	/// }
+	/// ```
 	pub fn capnp_serializer(&self) -> Rc<CapnpSerializer<Vec<u8>>> {
 		Rc::clone(&self.capnp_serializer)
 	}

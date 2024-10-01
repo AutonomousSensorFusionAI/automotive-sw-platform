@@ -1,7 +1,7 @@
 use crate::log_level::*;
 use chrono::offset::Utc;
 use backtrace::Backtrace;
-// use std::marker::Copy;
+
 
 #[repr(C)]
 #[derive(Debug, Default, Clone)]
@@ -13,6 +13,26 @@ pub struct LogMessage {
 }
 
 impl LogMessage {
+    /// # Examples
+    /// ### Using Enum of LogLevel
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main() {
+    ///     let log_message = LogMessage::new(LogLevel::Info, "This is Info");
+    /// }
+    /// ```
+    /// 
+    /// ### Using String
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main() {
+    ///     let log_message = LogMessage::new(LogLevel::from_str("info").unwrap(), "This is Info");
+    /// }
+    /// ```
     pub fn new<T>(log_level: LogLevel, data: T) -> Self 
     where
         T: Into<String>,
@@ -27,7 +47,16 @@ impl LogMessage {
             }
         }
     }
-
+    /// # Example
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main(){
+    ///     let mut log_msg = LogMessage::default();
+    ///     log_msg.msg(LogLevel::Info, "This is Info");
+    /// }
+    /// ```
     pub fn msg<T>(&mut self, log_level: LogLevel, data: T)
     where
         T: Into<String>,

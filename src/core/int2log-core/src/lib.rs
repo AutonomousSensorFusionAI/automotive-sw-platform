@@ -1,3 +1,19 @@
+//! This is a library for Int2Log's logging system.
+//! You can set up the logger using ConsoleLogger, FileLogger, and MiddlewareLogger to utilize the logging system.
+//! 
+//! # Examples
+//! ### Log
+//! The example below shows how to use Int2Log's Logging System
+//! ```
+//! use int2log_core::*;
+//! 
+//! fn main() {
+//! 	let mut log = Log::default();
+//! 	log.error("Hi, Error!".to_string());
+//! }
+//! ```
+
+
 use derivative::Derivative;
 use std::{
 	fmt::Debug,
@@ -174,21 +190,53 @@ impl Logger {
 
 	/// Note that it is only available when defined as the default.
 	/// Return type: `(Rc<RefCell<ConsoleLogger>>`, `Rc<RefCell<FileLogger>>`, `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`)
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let (default_console, default_file, default_middeleware) = logger.get_default_logger();
+	/// }
 	pub fn get_default_logger(&self) -> (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>) {
 		(self.default_console(), self.default_file(), self.default_middeleware())
 	}
 	/// Note that it is only available when defined as the default.
 	/// Retrun type: `Rc<RefCell<ConsoleLogger>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_console = logger.default_console();
+	/// }
 	pub fn default_console(&self) -> Rc<RefCell<ConsoleLogger>> {
 		self.default_console.clone().expect("You don't have Default Console Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
 	/// Retrun type: `Rc<RefCell<FileLogger>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_file = logger.default_file();
+	/// }
 	pub fn default_file(&self) -> Rc<RefCell<FileLogger>> {
 		self.default_file.clone().expect("You don't have Default File Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
 	/// Retrun type: `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_middeleware = logger.default_middeleware();
+	/// }
 	pub fn default_middeleware(&self) -> Rc<RefCell<MiddlewareLogger<Vec<u8>>>> {
 		self.default_middeleware.clone().expect("You don't have Default Middleware Logger. Please check if you defined the Logger using the default function.")
 	}
@@ -196,10 +244,43 @@ impl Logger {
 
 impl LoggerSpec for Logger {
 	/// You can use this function to attach your logger.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// use std::{
+	/// 	rc::Rc,
+	/// 	cell::RefCell,
+	/// };
+	/// 
+	/// fn main() {
+	/// 	// Define your logger Using ConsoleLogger, FileLogger, or MiddlewareLogger.
+	/// 	// let something_logger = ...;
+	/// 	let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
+	/// 	let mut logger = Logger::new();
+	/// 	logger.attach(console_logger.clone());
+	/// }
+	/// ```
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.push(logger);
 	}
 	/// You can use this function to detach your logger.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// use std::{
+	/// 	rc::Rc,
+	/// 	cell::RefCell,
+	/// };
+	/// 
+	/// fn main() {
+	/// 	// Define your logger Using ConsoleLogger, FileLogger, or MiddlewareLogger.
+	/// 	// let something_logger = ...;
+	/// 	let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
+	/// 	let mut logger = Logger::new();
+	/// 	logger.attach(console_logger.clone());
+	/// 	logger.detach(console_logger.clone());
+	/// }
+	/// ```
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
 	}
@@ -294,17 +375,44 @@ impl LogCommon for ConsoleLogger{
 	}
 }
 impl LoggingSpec for ConsoleLogger {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `ConsoleLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_log_level("warn");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `ConsoleLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `ConsoleLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -318,7 +426,7 @@ impl LogCommon for FileLogger {
 			self.log_level = log_level;
 		}
 	}
-	/// Processing Log Message.
+	// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		let mut file = self.get_log_file();
 		if self.active == true {
@@ -336,17 +444,44 @@ impl LogCommon for FileLogger {
 	}
 }
 impl LoggingSpec for FileLogger {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `FileLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_log_level("trace");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `FileLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `FileLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -358,7 +493,16 @@ impl FileLogger {
 	fn default_file_path() -> String {
 		"log.txt".to_string()
 	}
-
+	/// Set the path for your log file.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_file_path("src/log_file.txt");
+	/// }
+	/// ```
 	pub fn set_file_path(&mut self, file_path: &str) {
 		self.file_path = file_path.to_string();
 	}
@@ -405,17 +549,44 @@ impl<T> LoggingSpec for MiddlewareLogger<T>
 where
 	T: Debug,
 {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `MiddlewareLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_log_level("error");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `MiddlewareLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `MiddlewareLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -423,6 +594,17 @@ where
 impl<T: Debug> ILogging for MiddlewareLogger<T> {}
 
 impl MiddlewareLogger<Vec<u8>> {
+	/// Using this, you can set `MiddlewareLogger` as the default setting.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn default() -> Self {
 		// middleware default 생성을 동기함수로 사용하기 위해 tokio::task::block_in_place 사용
 		let middleware = Rc::new(block_in_place(|| {
@@ -436,6 +618,20 @@ impl MiddlewareLogger<Vec<u8>> {
 }
 
 impl<T> MiddlewareLogger<T> {
+	/// Using this, you can define your `MiddlewareLogger`.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create serializer and middleware instances
+	/// 	// let serializer = ...;
+	/// 	// let middleware = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::new(serializer, middleware);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn new(serializer: Rc<dyn Serialization<T>>, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: Default::default(),
@@ -447,6 +643,18 @@ impl<T> MiddlewareLogger<T> {
 		}
 	}
 	/// You can set your serializer instead of default serializer (capn')
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create serializer instance
+	/// 	// let serializer = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::default().serializer(serializer);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn serializer(self, serializer: Rc<dyn Serialization<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
@@ -458,6 +666,18 @@ impl<T> MiddlewareLogger<T> {
 		}
     }
 	/// You can set your middleware instead of default middleware (Zenoh)
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create middleware instance
+	/// 	// let middleware = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::default().middleware(middleware);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn middleware(self, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,

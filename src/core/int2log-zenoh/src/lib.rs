@@ -25,14 +25,7 @@
 //! 
 //! #[tokio::main]
 //! async fn main() {
-//!     /*
-//!         let zenoh_config = ZenohConfiguration{
-//!             config: Default::default(),
-//!             pub_key: Some(String::from("log")),
-//!             sub_key: Some(String::from("log")),
-//!         };
-//!      */
-//!     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log".to_string());
+//!     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
 //!     let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
 //!     std::thread::sleep(std::time::Duration::from_secs(10)); // Waiting for Opening Session
 //!     middleware.sender(String::from("Hi! It's me!")).await;
@@ -58,16 +51,43 @@ pub struct ZenohConfiguration {
 }
 use std::path::PathBuf;
 impl ZenohConfiguration {
-    /// zenoh.json5 config를 읽어오기 위한 함수
+    /// Reading `zenoh.json5` Zenoh Configuration file in int2log-zenoh dir
     fn load_config_from_file(file_path: &str) -> zenoh::Config {
         let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         config_path.push(file_path);
         let config = zenoh::Config::from_file(config_path).expect("Failed to load configuration file");
         config
     }
-
-    pub fn set_subscriber_key(mut self, sub_key: String) -> Self{
-        self.sub_key = Some(sub_key);
+    /// Setting Publisher key if you want to create publisher
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// fn main() {
+    ///     let zenoh_config = ZenohConfiguration::default().set_publisher_key("custom_log");
+    /// }
+    /// ```
+    pub fn set_publisher_key<T>(mut self, pub_key: T) -> Self
+    where 
+        T: Into<String>
+    {
+        self.pub_key = Some(pub_key.into());
+        self
+    }
+    /// Setting Subscriber key if you want to create subscriber
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// fn main() {
+    ///     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
+    /// }
+    /// ```
+    pub fn set_subscriber_key<T>(mut self, sub_key: T) -> Self
+    where 
+        T: Into<String>
+    {
+        self.sub_key = Some(sub_key.into());
         self
     }
 }
@@ -95,11 +115,34 @@ pub struct ZenohMiddlewareBuilder {
 
 impl ZenohMiddlewareBuilder {
     /// You can use this when you want to set your pub/sub key
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let zenoh_config = ZenohConfiguration{
+    ///         config: Default::default(),
+    ///         pub_key: Some(String::from("my_key")),
+    ///         sub_key: Some(String::from("my_key")),
+    ///     };
+    ///     let middleware_builder = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
+    /// }
+    /// ```
     pub fn config(mut self, config: ZenohConfiguration) -> Self {
         self.config = config;
         self
     }
-    /// Builder pattern
+    /// Build function
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let middleware = ZenohMiddlewareBuilder::default().build().await.unwrap();
+    /// }
+    /// ```
     pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         let config = self.config.clone();
         let session = self.session.clone();
@@ -174,7 +217,7 @@ pub struct ZenohMiddleware {
 }
 
 impl ZenohMiddleware {
-    pub async fn new(
+    async fn new(
         config: ZenohConfiguration, 
         session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
         publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>, 
@@ -187,7 +230,16 @@ impl ZenohMiddleware {
             subscriber,
         }
     }
-
+    /// Default function. This will return the Zenoh session and publisher based on your settings in `zenoh.json5`.
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let middleware = ZenohMiddleware::default().await;
+    /// }
+    /// ```
     pub async fn default() -> Self{
         ZenohMiddlewareBuilder::default().build().await.unwrap()
     }
@@ -217,6 +269,7 @@ impl Communication<Vec<u8>> for ZenohMiddleware{
 }
 
 impl ZenohMiddleware {
+    /// Subscriber's callback function
     pub async fn receiver(&self) {
         let subscriber_opt = self.subscriber.lock().await;
         if let Some(subscriber) = &*subscriber_opt {
@@ -264,7 +317,7 @@ mod tests {
             pub_key: Some(String::from("log")),
             sub_key: Some(String::from("log")),
         };
-        let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log".to_string());
+        let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
         let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
         // let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
         // let middleware = ZenohMiddleware::default().await;
