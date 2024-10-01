@@ -14,6 +14,7 @@
 * [Documents](./docs/) : 문서(설계 자료, 참고 논문 등)
     + [Rules](./docs/rules/) : 개발 관련 그라운드 룰
         - [Git 사용 방안](./docs/rules/git.md) : Git 사용 관련 권고 사항 정리
+    + [Build](./docs/build.md): 빌드 및 설치 안내
 * [Source](./src/) : 개발 산출물
     - [Core](./src/core) : 코어 로직
     - [Clients](./src/clients) : 언어별 Wrapper 
