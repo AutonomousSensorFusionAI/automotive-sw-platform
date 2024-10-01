@@ -1,3 +1,19 @@
+//! This is a library for Int2Log's logging system.
+//! You can set up the logger using ConsoleLogger, FileLogger, and MiddlewareLogger to utilize the logging system.
+//! 
+//! # Examples
+//! ### Log
+//! The example below shows how to use Int2Log's Logging System
+//! ```
+//! use int2log_core::*;
+//! 
+//! fn main() {
+//! 	let mut log = Log::default();
+//! 	log.error("Hi, Error!".to_string());
+//! }
+//! ```
+
+
 use derivative::Derivative;
 use std::{
 	fmt::Debug,
@@ -125,10 +141,10 @@ mod logger_examples{
 	자세한 내용: https://doc.rust-kr.org/ch15-05-interior-mutability.html
 */
 #[derive(Debug)]
-/// Logger 집합 구조체
+/// A Logger struct that combines multiple loggers like File Logger, Console Logger, and Middleware Logger.
 pub struct Logger {
 	/// It is a collection of either default-defined or user-defined loggers that implement the ILogging interface.
-	loggers: Vec<Rc<RefCell<dyn ILogging>>>,
+	pub loggers: Vec<Rc<RefCell<dyn ILogging>>>,
 	/// The field exists or is None only when defined as the default.
 	default_console: Option<Rc<RefCell<ConsoleLogger>>>,
 	/// The field exists or is None only when defined as the default.
@@ -144,7 +160,7 @@ pub struct Logger {
 
 	편의를 위해 다른 로거들(콘솔, 파일, 미들웨어)을 정의하지 않고도 기본으로 사용할 수 있도록 Default 트레잇을 따로 정의하였습니다.
  */
-/// Logger에 ConsoleLogger, FileLogger, MiddlewareLogger(Zenoh) 집합 등록
+/// This function would automatically register the File Logger, Console Logger, and Middleware Logger as defaults.
 impl Default for Logger {
 	fn default() -> Self {
 		let mut logger = Logger::new();
@@ -173,22 +189,54 @@ impl Logger {
 	}
 
 	/// Note that it is only available when defined as the default.
-	/// Return type: (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>)
+	/// Return type: `(Rc<RefCell<ConsoleLogger>>`, `Rc<RefCell<FileLogger>>`, `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`)
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let (default_console, default_file, default_middeleware) = logger.get_default_logger();
+	/// }
 	pub fn get_default_logger(&self) -> (Rc<RefCell<ConsoleLogger>>, Rc<RefCell<FileLogger>>, Rc<RefCell<MiddlewareLogger<Vec<u8>>>>) {
 		(self.default_console(), self.default_file(), self.default_middeleware())
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<ConsoleLogger>>
+	/// Retrun type: `Rc<RefCell<ConsoleLogger>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_console = logger.default_console();
+	/// }
 	pub fn default_console(&self) -> Rc<RefCell<ConsoleLogger>> {
 		self.default_console.clone().expect("You don't have Default Console Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<FileLogger>>
+	/// Retrun type: `Rc<RefCell<FileLogger>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_file = logger.default_file();
+	/// }
 	pub fn default_file(&self) -> Rc<RefCell<FileLogger>> {
 		self.default_file.clone().expect("You don't have Default File Logger. Please check if you defined the Logger using the default function.")
 	}
 	/// Note that it is only available when defined as the default.
-	/// Retrun type: Rc<RefCell<MiddlewareLogger<Vec<u8>>>>
+	/// Retrun type: `Rc<RefCell<MiddlewareLogger<Vec<u8>>>>`
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let logger = Logger::default();
+	/// 	let default_middeleware = logger.default_middeleware();
+	/// }
 	pub fn default_middeleware(&self) -> Rc<RefCell<MiddlewareLogger<Vec<u8>>>> {
 		self.default_middeleware.clone().expect("You don't have Default Middleware Logger. Please check if you defined the Logger using the default function.")
 	}
@@ -196,10 +244,43 @@ impl Logger {
 
 impl LoggerSpec for Logger {
 	/// You can use this function to attach your logger.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// use std::{
+	/// 	rc::Rc,
+	/// 	cell::RefCell,
+	/// };
+	/// 
+	/// fn main() {
+	/// 	// Define your logger Using ConsoleLogger, FileLogger, or MiddlewareLogger.
+	/// 	// let something_logger = ...;
+	/// 	let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
+	/// 	let mut logger = Logger::new();
+	/// 	logger.attach(console_logger.clone());
+	/// }
+	/// ```
 	fn attach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.push(logger);
 	}
 	/// You can use this function to detach your logger.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// use std::{
+	/// 	rc::Rc,
+	/// 	cell::RefCell,
+	/// };
+	/// 
+	/// fn main() {
+	/// 	// Define your logger Using ConsoleLogger, FileLogger, or MiddlewareLogger.
+	/// 	// let something_logger = ...;
+	/// 	let console_logger = Rc::new(RefCell::new(ConsoleLogger::default()));
+	/// 	let mut logger = Logger::new();
+	/// 	logger.attach(console_logger.clone());
+	/// 	logger.detach(console_logger.clone());
+	/// }
+	/// ```
 	fn detach(&mut self, logger: Rc<RefCell<dyn ILogging>>) {
 		self.loggers.retain(|l| !Rc::ptr_eq(l, &logger));
 	}
@@ -231,41 +312,43 @@ impl ILogger for Logger {}
 */
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
-/// Console Logger
+/// Logger for console output
 pub struct ConsoleLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
-/// Middleware Logger
-/// Default Middleware is Zenoh
+/// Logger for Middleware (Pub/Sub)
 pub struct MiddlewareLogger<T> 
 {	
 	// 여러 MiddlewareLogger 인스턴스가 동일한 middleware나 serializer를 참조할 수 있도록 Rc로 래핑.
 	// 해당 트레잇을 구현하는 타입만 필드로 저장할 수 있도록 동적 디스패치 사용
-	middleware: Rc<dyn Communication<T>>,
-	serializer: Rc<dyn Serialization<T>>,
-	log_level: LogLevel,
+	/// Default Middleware: Zenoh
+	pub middleware: Rc<dyn Communication<T>>,
+	/// Default Serializer: Capn'Proto
+	pub serializer: Rc<dyn Serialization<T>>,
+	pub log_level: LogLevel,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 	_phantom: PhantomData<T>, // T를 위해 정의된 필드.
 }
 
 #[derive(Derivative)]
 #[derivative(Default, Debug)]
+/// Logger for File Output
 pub struct FileLogger {
-	log_level: LogLevel,
+	pub log_level: LogLevel,
 	/// If no file_path is provided, it will search for or create 'log.txt' in the current directory.
 	/// You can set your file_path using set_file_path("your_path").
 	#[derivative(Default(value="FileLogger::default_file_path()"))]
-	file_path: String,
+	pub file_path: String,
 	#[derivative(Default(value="true"))]
-	active: bool,
+	pub active: bool,
 	set_flag: bool,
 }
 
@@ -281,28 +364,55 @@ impl LogCommon for ConsoleLogger{
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				match log_message.log_level { 
-					LogLevel::Trace => println!("{} - Trace - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Debug => println!("{} - Debug - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Info => println!("{} - Info - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Warn => println!("{} - Warn - {}", log_message.timestamp, &log_message.msg),
-					LogLevel::Error => println!("{} - Error - {}", log_message.timestamp, &log_message.msg),
+					LogLevel::Trace => println!("{} - Trace - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Debug => println!("{} - Debug - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Info => println!("{} - Info - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Warn => println!("{} - Warn - {}", log_message.timestamp, &log_message.data),
+					LogLevel::Error => println!("{} - Error - {}", log_message.timestamp, &log_message.data),
 				}
 			}
 		}
 	}
 }
 impl LoggingSpec for ConsoleLogger {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `ConsoleLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_log_level("warn");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `ConsoleLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `ConsoleLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut console_logger = ConsoleLogger::default();
+	/// 	console_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -316,17 +426,17 @@ impl LogCommon for FileLogger {
 			self.log_level = log_level;
 		}
 	}
-	/// Processing Log Message.
+	// Processing Log Message.
 	fn process(&self, log_message: &LogMessage) {
 		let mut file = self.get_log_file();
 		if self.active == true {
 			if (self.log_level) <= (log_message.log_level) {
 				let log_entry = match log_message.log_level {
-					LogLevel::Trace => format!("{} - Trace - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Debug => format!("{} - Debug - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Info => format!("{} - Info - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Warn => format!("{} - Warn - {} \n", log_message.timestamp, &log_message.msg),
-					LogLevel::Error => format!("{} - Error - {} \n", log_message.timestamp, &log_message.msg),
+					LogLevel::Trace => format!("{} - Trace - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Debug => format!("{} - Debug - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Info => format!("{} - Info - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Warn => format!("{} - Warn - {} \n", log_message.timestamp, &log_message.data),
+					LogLevel::Error => format!("{} - Error - {} \n", log_message.timestamp, &log_message.data),
 				};
 				file.write_all(log_entry.as_bytes()).expect("Failed to write log file");
 			}
@@ -334,17 +444,44 @@ impl LogCommon for FileLogger {
 	}
 }
 impl LoggingSpec for FileLogger {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `FileLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_log_level("trace");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `FileLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `FileLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -356,7 +493,16 @@ impl FileLogger {
 	fn default_file_path() -> String {
 		"log.txt".to_string()
 	}
-
+	/// Set the path for your log file.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut file_logger = FileLogger::default();
+	/// 	file_logger.set_file_path("src/log_file.txt");
+	/// }
+	/// ```
 	pub fn set_file_path(&mut self, file_path: &str) {
 		self.file_path = file_path.to_string();
 	}
@@ -403,17 +549,44 @@ impl<T> LoggingSpec for MiddlewareLogger<T>
 where
 	T: Debug,
 {
-	/// You can set the log level like logger.set_log_level("trace").
+	/// You can set `MiddlewareLogger`'s log level.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_log_level("error");
+	/// }
+	/// ```
 	fn set_log_level(&mut self, log_level: &str) {
 		self.set_flag = true;
 		let log_level = LogLevel::from_str(log_level);
 		self.log_level = log_level.expect("To choose between 'trace', 'debug', 'info', 'warn', and 'error'");
 	}
-	/// You can set the active true like logger.set_active_true().
+	/// You can set `MiddlewareLogger`'s active status true.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_active_true();
+	/// }
+	/// ```
 	fn set_active_true(&mut self) {
 		self.active = true;
 	}
-	/// You can set the active false like logger.set_active_false().
+	/// You can set `MiddlewareLogger`'s active status false.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	mw_logger.set_active_false();
+	/// }
+	/// ```
 	fn set_active_false(&mut self) {
 		self.active = false;
 	}
@@ -421,6 +594,17 @@ where
 impl<T: Debug> ILogging for MiddlewareLogger<T> {}
 
 impl MiddlewareLogger<Vec<u8>> {
+	/// Using this, you can set `MiddlewareLogger` as the default setting.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	let mut mw_logger = MiddlewareLogger::default();
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn default() -> Self {
 		// middleware default 생성을 동기함수로 사용하기 위해 tokio::task::block_in_place 사용
 		let middleware = Rc::new(block_in_place(|| {
@@ -434,6 +618,20 @@ impl MiddlewareLogger<Vec<u8>> {
 }
 
 impl<T> MiddlewareLogger<T> {
+	/// Using this, you can define your `MiddlewareLogger`.
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create serializer and middleware instances
+	/// 	// let serializer = ...;
+	/// 	// let middleware = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::new(serializer, middleware);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn new(serializer: Rc<dyn Serialization<T>>, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: Default::default(),
@@ -444,6 +642,19 @@ impl<T> MiddlewareLogger<T> {
 			_phantom: Default::default(),
 		}
 	}
+	/// You can set your serializer instead of default serializer (capn')
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create serializer instance
+	/// 	// let serializer = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::default().serializer(serializer);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn serializer(self, serializer: Rc<dyn Serialization<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
@@ -454,6 +665,19 @@ impl<T> MiddlewareLogger<T> {
 			_phantom: Default::default(),
 		}
     }
+	/// You can set your middleware instead of default middleware (Zenoh)
+	/// # Example
+	/// ```
+	/// use int2log_core::*;
+	/// 
+	/// fn main() {
+	/// 	// Create middleware instance
+	/// 	// let middleware = ...;
+	/// 	let mut mw_logger = MiddlewareLogger::default().middleware(middleware);
+	/// 	// Use mw_logger for logging
+	/// 	// ...
+	/// }
+	/// ```
 	pub fn middleware(self, middleware: Rc<dyn Communication<T>>) -> Self {
 		MiddlewareLogger {
 			log_level: self.log_level,
@@ -479,6 +703,7 @@ fn create_middleware_logger() {
 #[repr(C)]
 #[derive(Derivative)]
 #[derivative(Debug, Default)]
+/// Log System
 pub struct Log {
 	pub log_level: LogLevel,
 	pub log_message: LogMessage,
@@ -499,7 +724,7 @@ impl Log {
 		Log { logger, .. Default::default() }
 	}
 
-    pub fn process(&mut self, log_level: LogLevel, msg: String) {
+    fn process(&mut self, log_level: LogLevel, msg: String) {
 		// Log Message 생성 후 로거에 전달
 		self.log_message.msg(log_level, msg);
 		self.logger.borrow().process(&self.log_message);
@@ -554,7 +779,9 @@ mod tests {
 		console_logger_b.borrow_mut().set_active_true();
 		println!("{:?}", logger);
 		
-		let log_message = LogMessage::make_msg(LogLevel::Error, "Hi im error".to_string());
+		let mut log_message = LogMessage::default();
+		log_message.msg(LogLevel::Error, "Hi im error".to_string());
+		println!("{:?}", &log_message);
 		logger.borrow_mut().process(&log_message);
 	}
 

@@ -1,3 +1,40 @@
+//! `int2log-zenoh` is the Zenoh middleware library for Int2Log's logging systems.
+//! It publishes log messages locally or to the cloud, depending on the user's configuration, using the Zenoh protocol.
+//! Zenoh can be configured through the `zenoh.json5` file included in the crate.
+
+//! # Examples
+//! ### Publishing Data Using Default Value
+//! The example below shows how to produce a value
+//! ```
+//! use int2log_zenoh::*;
+//! use int2log_model::Communication; // this required to use the sender function from Communication trait
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//!     let middleware = ZenohMiddleware::default().await;
+//!     std::thread::sleep(std::time::Duration::from_secs(10)); // Waiting for Opening Session
+//!     middleware.sender(String::from("Hi! It's me!")).await;
+//! }
+//! ```
+//! 
+//! ### Custom
+//! The example below shows how to custom ZenohMiddleware.
+//! ```
+//! use int2log_zenoh::*;
+//! use int2log_model::Communication; // this required to use the sender function from Communication trait
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//!     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
+//!     let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
+//!     std::thread::sleep(std::time::Duration::from_secs(10)); // Waiting for Opening Session
+//!     middleware.sender(String::from("Hi! It's me!")).await;
+//!     // receiver() is Subscriber's Callback function. 
+//!     // You will get `[Subscriber] Received PUT ('log': 'Hi! It's me!')`.
+//!     middleware.receiver().await; 
+//! }
+//! ```
+
 use int2log_model::*;
 use std::{sync::Arc, future::Future, pin::Pin, thread};
 use tokio::{sync::Mutex, runtime::Runtime};
@@ -5,18 +42,53 @@ use tokio::{sync::Mutex, runtime::Runtime};
 
 #[derive(Debug, Clone)]
 pub struct ZenohConfiguration {
+    /// Reading `zenoh.json5` Zenoh Configuration file in int2log-zenoh dir
     pub config: zenoh::Config,
+    /// Default: Some(log)
     pub pub_key: Option<String>,
+    /// Default: None
     pub sub_key: Option<String>,
 }
 use std::path::PathBuf;
 impl ZenohConfiguration {
-    /// zenoh.json5 config를 읽어오기 위한 함수
+    /// Reading `zenoh.json5` Zenoh Configuration file in int2log-zenoh dir
     fn load_config_from_file(file_path: &str) -> zenoh::Config {
         let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         config_path.push(file_path);
         let config = zenoh::Config::from_file(config_path).expect("Failed to load configuration file");
         config
+    }
+    /// Setting Publisher key if you want to create publisher
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// fn main() {
+    ///     let zenoh_config = ZenohConfiguration::default().set_publisher_key("custom_log");
+    /// }
+    /// ```
+    pub fn set_publisher_key<T>(mut self, pub_key: T) -> Self
+    where 
+        T: Into<String>
+    {
+        self.pub_key = Some(pub_key.into());
+        self
+    }
+    /// Setting Subscriber key if you want to create subscriber
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// fn main() {
+    ///     let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
+    /// }
+    /// ```
+    pub fn set_subscriber_key<T>(mut self, sub_key: T) -> Self
+    where 
+        T: Into<String>
+    {
+        self.sub_key = Some(sub_key.into());
+        self
     }
 }
 
@@ -33,7 +105,7 @@ impl Default for ZenohConfiguration {
 // 빌더 패턴 사용
 #[derive(Default, Debug)]
 pub struct ZenohMiddlewareBuilder {
-    config: ZenohConfiguration,
+    pub config: ZenohConfiguration,
     // 외부 Arc<Mutex<...>>는 스레드간 이동 안전성 보장을 위해 사용됨
     // 내부 Arc는 퍼블리셔 혹은 세션을 Clone 하기 위해 사용(소유권 문제 해결)
     session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
@@ -42,7 +114,36 @@ pub struct ZenohMiddlewareBuilder {
 }
 
 impl ZenohMiddlewareBuilder {
-    pub async fn config(mut self) -> Self{
+    /// You can use this when you want to set your pub/sub key
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let zenoh_config = ZenohConfiguration{
+    ///         config: Default::default(),
+    ///         pub_key: Some(String::from("my_key")),
+    ///         sub_key: Some(String::from("my_key")),
+    ///     };
+    ///     let middleware_builder = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
+    /// }
+    /// ```
+    pub fn config(mut self, config: ZenohConfiguration) -> Self {
+        self.config = config;
+        self
+    }
+    /// Build function
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let middleware = ZenohMiddlewareBuilder::default().build().await.unwrap();
+    /// }
+    /// ```
+    pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         let config = self.config.clone();
         let session = self.session.clone();
         let publisher = self.publisher.clone();
@@ -98,10 +199,6 @@ impl ZenohMiddlewareBuilder {
                 }
             })
         });
-        self
-    }
-
-    pub async fn build(self) -> Result<ZenohMiddleware, &'static str> {
         Ok(ZenohMiddleware::new(
             self.config,
             self.session,
@@ -111,7 +208,7 @@ impl ZenohMiddlewareBuilder {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ZenohMiddleware {
     pub config: ZenohConfiguration,
     pub session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
@@ -120,7 +217,7 @@ pub struct ZenohMiddleware {
 }
 
 impl ZenohMiddleware {
-    pub async fn new(
+    async fn new(
         config: ZenohConfiguration, 
         session: Arc<Mutex<Option<Arc<zenoh::Session>>>>,
         publisher: Arc<Mutex<Option<Arc<zenoh::pubsub::Publisher<'static>>>>>, 
@@ -133,20 +230,24 @@ impl ZenohMiddleware {
             subscriber,
         }
     }
-
+    /// Default function. This will return the Zenoh session and publisher based on your settings in `zenoh.json5`.
+    /// # Example
+    /// ```
+    /// use int2log_zenoh::*;
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let middleware = ZenohMiddleware::default().await;
+    /// }
+    /// ```
     pub async fn default() -> Self{
-        ZenohMiddlewareBuilder::default().config().await.build().await.unwrap()
+        ZenohMiddlewareBuilder::default().build().await.unwrap()
     }
 }
 
 impl Communication<String> for ZenohMiddleware {
     fn sender(&self, data: String) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            let what = self.session.lock().await.as_ref().cloned();
-            match what {
-                Some(_) => println!("Some!"),
-                None => println!("None"),
-            }
             let publisher_opt = self.publisher.lock().await.as_ref().cloned();
             if let Some(publisher) = publisher_opt {
                 publisher.put(data).await.unwrap();
@@ -168,6 +269,7 @@ impl Communication<Vec<u8>> for ZenohMiddleware{
 }
 
 impl ZenohMiddleware {
+    /// Subscriber's callback function
     pub async fn receiver(&self) {
         let subscriber_opt = self.subscriber.lock().await;
         if let Some(subscriber) = &*subscriber_opt {
@@ -198,6 +300,11 @@ impl ZenohMiddleware {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::{
+        task::block_in_place,
+    };
+    use futures::executor::block_on;
+    use std::rc::Rc;
 
     // #[tokio::test]
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
@@ -205,20 +312,22 @@ mod tests {
         // let middleware_default = ZenohMiddlewareBuilder::default().config(ZenohConfiguration{..Default::default()}).await.unwrap().build().await.unwrap();
         // // println!("{:?}", middleware_default);
 
-        // let zenoh_config = ZenohConfiguration{
-        //     config: default(),
-        //     pub_key: Some(String::from("topic/test")),
-        //     sub_key: Some(String::from("topic/test")),
-        // };
+        let zenoh_config = ZenohConfiguration{
+            config: Default::default(),
+            pub_key: Some(String::from("log")),
+            sub_key: Some(String::from("log")),
+        };
+        let zenoh_config = ZenohConfiguration::default().set_subscriber_key("log");
+        let middleware = ZenohMiddlewareBuilder::default().config(zenoh_config).build().await.unwrap();
         // let middleware = ZenohMiddlewareBuilder::default().config().await.unwrap().build().await.unwrap();
-        let middleware = ZenohMiddleware::default().await;
+        // let middleware = ZenohMiddleware::default().await;
+        thread::sleep(std::time::Duration::from_secs(10));
+
         let payload_1 = String::from("Hi! It's me!");
         let payload_2: String = String::from("Hi! It's me!!");
         middleware.sender(payload_1).await;
         middleware.receiver().await;
         middleware.sender(payload_2).await;
         middleware.receiver().await;
-        // let config = load_config_from_file("zenoh.json5");
-        // println!("{:?}", config);
     }
 }

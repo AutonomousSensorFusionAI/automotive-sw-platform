@@ -1,22 +1,45 @@
 use crate::log_level::*;
 use chrono::offset::Utc;
 use backtrace::Backtrace;
-// use std::marker::Copy;
+
 
 #[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct LogMessage {
     pub log_level: LogLevel,
-    pub msg: String,
+    pub data: String,
     pub timestamp: String,
     pub logger: String,
 }
 
 impl LogMessage {
-    pub fn make_msg(log_level: LogLevel, msg: String) -> Self {
+    /// # Examples
+    /// ### Using Enum of LogLevel
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main() {
+    ///     let log_message = LogMessage::new(LogLevel::Info, "This is Info");
+    /// }
+    /// ```
+    /// 
+    /// ### Using String
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main() {
+    ///     let log_message = LogMessage::new(LogLevel::from_str("info").unwrap(), "This is Info");
+    /// }
+    /// ```
+    pub fn new<T>(log_level: LogLevel, data: T) -> Self 
+    where
+        T: Into<String>,
+    {
         LogMessage {
             log_level,
-            msg,
+            data: data.into(),
             timestamp: Self::get_timestamp(),
             logger: match Self::caller_name() {
                 Some(caller_info) => caller_info,
@@ -24,16 +47,27 @@ impl LogMessage {
             }
         }
     }
-
-    pub fn msg(&mut self, log_level: LogLevel, msg: String) -> &mut Self{
+    /// # Example
+    /// ```
+    /// use int2log_model::log_message::*;
+    /// use int2log_model::log_level::*;
+    /// 
+    /// fn main(){
+    ///     let mut log_msg = LogMessage::default();
+    ///     log_msg.msg(LogLevel::Info, "This is Info");
+    /// }
+    /// ```
+    pub fn msg<T>(&mut self, log_level: LogLevel, data: T)
+    where
+        T: Into<String>,
+    {
         self.log_level = log_level;
-        self.msg = msg;
+        self.data = data.into();
         self.timestamp = Self::get_timestamp();
         self.logger = match Self::caller_name() {
             Some(caller_info) => caller_info,
             None => "Unknown".to_string(),
         };
-        self
     }
 
     fn get_timestamp() -> String {
@@ -65,6 +99,7 @@ mod tests {
 	#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn it_works() {
         let mut message = LogMessage::default();
-        println!("{:?}",message.msg(LogLevel::Info, "Hi".to_string()));
+        message.msg(LogLevel::Info, "Hi");
+        println!("{:?}",message.data);
     }
 }
