@@ -37,7 +37,7 @@
 
 use int2log_model::serializer::*;
 use int2log_model::*;
-use std::{future::Future, pin::Pin, sync::Arc, thread};
+use std::{future::Future, path::PathBuf, pin::Pin, sync::Arc, thread};
 use tokio::{runtime::Runtime, sync::Mutex};
 
 #[derive(Debug, Clone)]
@@ -49,7 +49,7 @@ pub struct ZenohConfiguration {
     /// Default: None
     pub sub_key: Option<String>,
 }
-use std::path::PathBuf;
+
 impl ZenohConfiguration {
     /// Reading `zenoh.json5` Zenoh Configuration file in int2log-zenoh dir
     fn load_config_from_file(file_path: &str) -> zenoh::Config {
@@ -303,25 +303,19 @@ impl ZenohMiddleware {
         }
     }
     /// A callback function for the subscriber that includes deserializing the payload using Cap'n Proto.
-    pub async fn receiver_capnp(&self) {
+    pub async fn receiver_capnp(&self) -> Option<(String, log_message::LogMessage)> {
         let subscriber_opt = self.subscriber.lock().await;
         let serializer = SerializerFactory::new().capnp_serializer();
         if let Some(subscriber) = &*subscriber_opt {
             if let Ok(sample) = subscriber.recv_async().await {
                 let payload = sample.payload().to_bytes().into_owned();
                 let payload = serializer.deserialize_msg(&payload);
-                print!(
-                    ">> [Subscriber] Received {} ('{}': '{:?}')",
-                    sample.kind(),
-                    sample.key_expr().as_str(),
-                    payload
-                );
-                if let Some(att) = sample.attachment() {
-                    let att = att.try_to_string().unwrap_or_else(|e| e.to_string().into());
-                    print!(" ({})", att);
-                }
-                println!();
+                Some((String::from(sample.key_expr().as_str()),payload))
+            } else {
+                None
             }
+        } else {
+            None
         }
     }
 }
