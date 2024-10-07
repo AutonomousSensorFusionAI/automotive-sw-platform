@@ -1,4 +1,5 @@
 use int2log_zenoh::*;
+use futures::FutureExt; // map을 사용하기 위해 필요
 
 #[tokio::main]
 async fn main() {
@@ -14,6 +15,11 @@ async fn main() {
         .unwrap();
 
     loop {
-        middleware.receiver_capnp().await
+        let log_message = middleware.receiver_capnp().map(|value| {
+            value.map(|(key, value)| {
+                println!(">> [Subscriber] Received ('{}': '{:?}')", key, value);
+            })
+        });
+        log_message.await;
     }
 }
