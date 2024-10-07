@@ -285,8 +285,8 @@ impl ZenohMiddleware {
             if let Ok(sample) = subscriber.recv_async().await {
                 let payload = sample
                     .payload()
-                    .deserialize::<String>()
-                    .unwrap_or_else(|e| format!("{}", e));
+                    .try_to_string()
+                    .unwrap_or_else(|e| e.to_string().into());
 
                 print!(
                     ">> [Subscriber] Received {} ('{}': '{}')",
@@ -295,9 +295,7 @@ impl ZenohMiddleware {
                     payload
                 );
                 if let Some(att) = sample.attachment() {
-                    let att = att
-                        .deserialize::<String>()
-                        .unwrap_or_else(|e| format!("{}", e));
+                    let att = att.try_to_string().unwrap_or_else(|e| e.to_string().into());
                     print!(" ({})", att);
                 }
                 println!();
@@ -310,7 +308,7 @@ impl ZenohMiddleware {
         let serializer = SerializerFactory::new().capnp_serializer();
         if let Some(subscriber) = &*subscriber_opt {
             if let Ok(sample) = subscriber.recv_async().await {
-                let payload = sample.payload().deserialize::<Vec<u8>>().unwrap();
+                let payload = sample.payload().to_bytes().into_owned();
                 let payload = serializer.deserialize_msg(&payload);
                 print!(
                     ">> [Subscriber] Received {} ('{}': '{:?}')",
@@ -319,9 +317,7 @@ impl ZenohMiddleware {
                     payload
                 );
                 if let Some(att) = sample.attachment() {
-                    let att = att
-                        .deserialize::<String>()
-                        .unwrap_or_else(|e| format!("{}", e));
+                    let att = att.try_to_string().unwrap_or_else(|e| e.to_string().into());
                     print!(" ({})", att);
                 }
                 println!();
