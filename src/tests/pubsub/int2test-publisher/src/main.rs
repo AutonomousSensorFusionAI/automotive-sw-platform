@@ -11,11 +11,19 @@ async fn main() {
     let config_path = format!("{}/zenoh.json5", env!("CARGO_MANIFEST_DIR"));
     let config = Config::from_file(config_path).expect("Failed to load configuration file");
     let pub_key = "log/pub";
-    let sub_key = "log/sub";
-    // let mut sub_count;
+    let sub_key = "log/sub/**";
+    const SUBS_NUM: usize = 2;
 
     println!("Opening session...");
-    let session = zenoh::open(config).await.unwrap();
+    let session = loop {
+        match zenoh::open(config.clone()).await {
+            Ok(session) => break session,
+            Err(e) => {
+                println!("Failed to open session: {:?}. Retrying...", e);
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            }
+        }
+    }; // client일 때만 Result 작동
 
     println!("Declaring Publisher on '{pub_key}'...");
     println!("Declaring Subscriber on '{sub_key}'...");
@@ -26,25 +34,31 @@ async fn main() {
 
     let mut start_flag = false;
     let health_check = Duration::from_secs(10);
-    let mut sub_flag = false;
+    let mut sub_flag = [false; SUBS_NUM];
 
     // // Subscriber 켜질 때까지 waiting (Pingpong으로 확인)
     while !start_flag {
         match tokio::time::timeout(health_check, receiver(&subscriber)).await {
-            Ok(Some(count)) => match count {
-                -1 if !sub_flag => {
+            Ok(Some((sub_key, count))) => match count {
+                -1 if !sub_flag[sub_key] => {
                     publisher.put(serialize_msg(-2)).await.unwrap();
-                    sub_flag = true;
+                    sub_flag[sub_key] = true;
                 }
-                0 if sub_flag => {
-                    publisher.put(serialize_msg(0)).await.unwrap();
-                    start_flag = true;
+                0 if sub_flag[sub_key] => {
+                    println!(
+                        "{}th subscriber connected, waiting for other subscribers",
+                        sub_key
+                    );
+                    if sub_flag.iter().all(|&x| x) {
+                        publisher.put(serialize_msg(0)).await.unwrap();
+                        start_flag = true;
+                    }
                 }
                 _ => {}
             },
             Ok(None) => {}
             Err(_) => {
-                sub_flag = false;
+                sub_flag = [false; SUBS_NUM];
                 println!(
                     "{} seconds passed without Subscriber starting. Retrying...",
                     health_check.as_secs()
@@ -75,11 +89,18 @@ async fn main() {
     publisher.undeclare().await.unwrap();
 }
 
-async fn receiver(subscriber: &Subscriber<Receiver<Sample>>) -> Option<i32> {
+async fn receiver(subscriber: &Subscriber<Receiver<Sample>>) -> Option<(usize, i32)> {
     if let Ok(sample) = subscriber.recv_async().await {
+        let mut sub_key = sample.key_expr().as_str().to_string();
+        let sub_num = sub_key
+            .pop()
+            .unwrap()
+            .to_digit(10)
+            .map(|d| d as usize)
+            .unwrap();
         let payload = sample.payload().to_bytes().into_owned();
         let (count, _) = capnp_message::deserialize_msg(&payload);
-        Some(count)
+        Some((sub_num, count))
     } else {
         None
     }

@@ -5,16 +5,20 @@ use zenoh::{pubsub::Subscriber, sample::Sample, Config};
 
 #[tokio::main]
 async fn main() {
-    let config_path = format!(
-        "{}/../int2test-publisher/zenoh.json5",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let config = Config::from_file(config_path).expect("Failed to load configuration file");
-    let pub_key = "log/sub";
+    let config = Config::default();
+    let pub_key = "log/sub/0";
     let sub_key = "log/pub";
 
     println!("Opening session...");
-    let session = zenoh::open(config).await.unwrap();
+    let session = loop {
+        match zenoh::open(config.clone()).await {
+            Ok(session) => break session,
+            Err(e) => {
+                println!("Failed to open session: {:?}. Retrying...", e);
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            }
+        }
+    }; // client일 때만 Result 작동
 
     println!("Declaring Publisher on '{pub_key}'...");
     println!("Declaring Subscriber on '{sub_key}'...");
@@ -63,7 +67,7 @@ async fn main() {
         match pub_count {
             -1 => {
                 count -= 1;
-                println!("sub_count: {}, missing: {:?}", count, missing);
+                // println!("sub_count: {}, missing: {:?}", count, missing);
                 break;
             }
             _ if pub_count != count => {
