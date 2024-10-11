@@ -118,3 +118,23 @@ target_include_directories(image_ping PRIVATE
 )
 set_property(TARGET image_ping PROPERTY LANGUAGE CXX)
 set_property(TARGET image_ping PROPERTY CXX_STANDARD 17)
+
+
+add_executable(image_pong image_pong.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(image_pong PUBLIC
+  zenohcxx::zenohc::lib
+  nlohmann_json::nlohmann_json # for zenoh_data_publisher, subscriber
+  zenoh_data_publisher
+  zenoh_data_subscriber
+  zenoh_session
+  ${OpenCV_LIBS}
+  ${Protobuf_LIBRARIES}
+)
+target_include_directories(image_pong PRIVATE
+  "../zenoh_helper_cpp/include"
+  ${OpenCV_INCLUDE_DIRS}
+  ${Protobuf_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/image_transmission
+)
+set_property(TARGET image_pong PROPERTY LANGUAGE CXX)
+set_property(TARGET image_pong PROPERTY CXX_STANDARD 17)
