@@ -32,3 +32,8 @@ add_library(zenoh_data_publisher STATIC zenoh_data_publisher.cpp)
 target_link_libraries(zenoh_data_publisher PUBLIC zenohcxx::zenohc::lib PRIVATE nlohmann_json::nlohmann_json)
 set_property(TARGET zenoh_data_publisher PROPERTY LANGUAGE CXX)
 set_property(TARGET zenoh_data_publisher PROPERTY CXX_STANDARD 17)
+
+add_library(zenoh_data_subscriber STATIC zenoh_data_subscriber.cpp)
+target_link_libraries(zenoh_data_subscriber PUBLIC zenohcxx::zenohc::lib PRIVATE nlohmann_json::nlohmann_json)
+set_property(TARGET zenoh_data_subscriber PROPERTY LANGUAGE CXX)
+set_property(TARGET zenoh_data_subscriber PROPERTY CXX_STANDARD 17)
