@@ -46,6 +46,14 @@ add_executable(sub src/subscriber_member_function.cpp)
 ament_target_dependencies(sub
   rclcpp std_msgs)
 
+add_executable(sub_image src/subscriber_member_function_image.cpp)
+ament_target_dependencies(sub_image
+  rclcpp
+  sensor_msgs
+  cv_bridge
+  image_transport
+  OpenCV)
+
 
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
@@ -61,12 +69,19 @@ target_link_libraries(pub_image
 
 target_link_libraries(sub "${cpp_typesupport_target}")
 
+target_link_libraries(sub_image
+  "${cpp_typesupport_target}"
+  cv_bridge::cv_bridge
+  image_transport::image_transport
+  opencv_imgcodecs)
+
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
   pub
   sub
   pub_image
+  sub_image
   DESTINATION lib/${PROJECT_NAME})
 
 install(
