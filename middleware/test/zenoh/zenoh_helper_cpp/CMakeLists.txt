@@ -27,3 +27,8 @@ add_library(zenoh_session STATIC zenoh_session.cpp)
 target_link_libraries(zenoh_session PUBLIC zenohcxx::zenohc::lib)
 set_property(TARGET zenoh_session PROPERTY LANGUAGE CXX)
 set_property(TARGET zenoh_session PROPERTY CXX_STANDARD 17)
+
+add_library(zenoh_data_publisher STATIC zenoh_data_publisher.cpp)
+target_link_libraries(zenoh_data_publisher PUBLIC zenohcxx::zenohc::lib PRIVATE nlohmann_json::nlohmann_json)
+set_property(TARGET zenoh_data_publisher PROPERTY LANGUAGE CXX)
+set_property(TARGET zenoh_data_publisher PROPERTY CXX_STANDARD 17)
