@@ -27,17 +27,24 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 add_executable(pub src/publisher_member_function.cpp)
 ament_target_dependencies(pub
-  rclcpp)
+  rclcpp) #std_msgs?
+
+add_executable(sub src/subscriber_member_function.cpp)
+ament_target_dependencies(sub
+  rclcpp std_msgs)
+
 
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 target_link_libraries(pub "${cpp_typesupport_target}")
+target_link_libraries(sub "${cpp_typesupport_target}")
 
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
   pub
+  sub
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
