@@ -25,14 +25,19 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 #   ADD_LINTER_TESTS
 )
 
+add_executable(pub src/publisher_member_function.cpp)
+ament_target_dependencies(pub
+  rclcpp)
 
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
+target_link_libraries(pub "${cpp_typesupport_target}")
 
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
+  pub
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
