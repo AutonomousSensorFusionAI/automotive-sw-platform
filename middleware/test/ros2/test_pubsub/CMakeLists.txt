@@ -12,6 +12,10 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED COMPONENTS highgui imgcodecs imgproc videoio)
+find_package(image_transport REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 
@@ -27,7 +31,16 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 add_executable(pub src/publisher_member_function.cpp)
 ament_target_dependencies(pub
-  rclcpp) #std_msgs?
+  rclcpp)
+
+add_executable(pub_image src/publisher_member_function_image.cpp)
+ament_target_dependencies(pub_image
+  rclcpp
+  sensor_msgs
+  cv_bridge
+  image_transport
+  OpenCV)
+
 
 add_executable(sub src/subscriber_member_function.cpp)
 ament_target_dependencies(sub
@@ -38,6 +51,14 @@ rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 target_link_libraries(pub "${cpp_typesupport_target}")
+
+target_link_libraries(pub_image
+  "${cpp_typesupport_target}"
+  cv_bridge::cv_bridge
+  image_transport::image_transport
+  opencv_imgcodecs)
+
+
 target_link_libraries(sub "${cpp_typesupport_target}")
 
 ament_export_dependencies(rosidl_default_runtime)
@@ -45,6 +66,7 @@ ament_export_dependencies(rosidl_default_runtime)
 install(TARGETS
   pub
   sub
+  pub_image
   DESTINATION lib/${PROJECT_NAME})
 
 install(
