@@ -78,3 +78,23 @@ target_include_directories(publisher_image PRIVATE
 )
 set_property(TARGET publisher_image PROPERTY LANGUAGE CXX)
 set_property(TARGET publisher_image PROPERTY CXX_STANDARD 17)
+
+
+add_executable(subscriber_image subscriber_image.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(subscriber_image PUBLIC
+  zenohcxx::zenohc::lib
+  nlohmann_json::nlohmann_json # for zenoh_data_publisher, subscriber
+  zenoh_data_publisher
+  zenoh_data_subscriber
+  zenoh_session
+  ${OpenCV_LIBS}
+  ${Protobuf_LIBRARIES}
+)
+target_include_directories(subscriber_image PRIVATE
+  "../zenoh_helper_cpp/include"
+  ${OpenCV_INCLUDE_DIRS}
+  ${Protobuf_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/image_transmission
+)
+set_property(TARGET subscriber_image PROPERTY LANGUAGE CXX)
+set_property(TARGET subscriber_image PROPERTY CXX_STANDARD 17)
