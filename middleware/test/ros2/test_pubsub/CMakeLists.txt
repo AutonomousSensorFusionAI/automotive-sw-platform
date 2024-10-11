@@ -19,10 +19,6 @@ find_package(image_transport REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 
-# include_directories(
-#   "${PROJECT_SOURCE_DIR}/msg"
-# )
-
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Test.msg"
   DEPENDENCIES std_msgs
@@ -32,7 +28,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_executable(pub src/publisher_member_function.cpp)
 ament_target_dependencies(pub
   rclcpp)
-
 add_executable(pub_image src/publisher_member_function_image.cpp)
 ament_target_dependencies(pub_image
   rclcpp
@@ -54,13 +49,16 @@ ament_target_dependencies(sub_image
   image_transport
   OpenCV)
 
-
 add_executable(image_ping src/image_ping.cpp)
 ament_target_dependencies(image_ping
   rclcpp
   sensor_msgs
 )
-
+add_executable(image_pong src/image_pong.cpp)
+ament_target_dependencies(image_pong
+  rclcpp
+  sensor_msgs
+)
 
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
@@ -82,7 +80,9 @@ target_link_libraries(sub_image
   image_transport::image_transport
   opencv_imgcodecs)
 
+
 target_link_libraries(image_ping "${cpp_typesupport_target}")
+target_link_libraries(image_pong "${cpp_typesupport_target}")
 
 ament_export_dependencies(rosidl_default_runtime)
 
@@ -92,6 +92,7 @@ install(TARGETS
   pub_image
   sub_image
   image_ping
+  image_pong
   DESTINATION lib/${PROJECT_NAME})
 
 install(
