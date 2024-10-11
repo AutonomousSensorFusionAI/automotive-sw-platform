@@ -4,8 +4,9 @@
   <name>test_pubsub</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="hs.shin@int2.us">Intellectus-Shinhaeseul</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="ubuntu@todo.todo">ubuntu</maintainer>
+  <license>AGPL-3.0</license>
+  <!-- <license>Apache-2.0</license> -->
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -14,7 +15,14 @@
 
   <build_depend>rosidl_default_generators</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+
   <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>image_transport</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
 
   <depend>rclcpp</depend>

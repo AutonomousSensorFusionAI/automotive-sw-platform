@@ -1,0 +1,7 @@
+{
+  "transport": {
+    "shared_memory": {
+      "enabled": true
+    }
+  }
+}
