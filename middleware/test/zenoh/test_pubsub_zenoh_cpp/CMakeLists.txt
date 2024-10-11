@@ -40,3 +40,18 @@ target_include_directories(publisher_string PRIVATE
 )
 set_property(TARGET publisher_string PROPERTY LANGUAGE CXX)
 set_property(TARGET publisher_string PROPERTY CXX_STANDARD 17)
+
+
+add_executable(subscriber_string subscriber_string.cpp)
+target_link_libraries(subscriber_string PUBLIC 
+  zenohcxx::zenohc::lib
+  nlohmann_json::nlohmann_json
+  zenoh_data_publisher
+  zenoh_data_subscriber
+  zenoh_session
+)
+target_include_directories(subscriber_string PRIVATE
+  "../zenoh_helper_cpp/include"
+)
+set_property(TARGET subscriber_string PROPERTY LANGUAGE CXX)
+set_property(TARGET subscriber_string PROPERTY CXX_STANDARD 17)
