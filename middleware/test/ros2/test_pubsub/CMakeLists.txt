@@ -55,6 +55,13 @@ ament_target_dependencies(sub_image
   OpenCV)
 
 
+add_executable(image_ping src/image_ping.cpp)
+ament_target_dependencies(image_ping
+  rclcpp
+  sensor_msgs
+)
+
+
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
@@ -75,6 +82,8 @@ target_link_libraries(sub_image
   image_transport::image_transport
   opencv_imgcodecs)
 
+target_link_libraries(image_ping "${cpp_typesupport_target}")
+
 ament_export_dependencies(rosidl_default_runtime)
 
 install(TARGETS
@@ -82,6 +91,7 @@ install(TARGETS
   sub
   pub_image
   sub_image
+  image_ping
   DESTINATION lib/${PROJECT_NAME})
 
 install(
