@@ -1,0 +1,12 @@
+[package]
+name = "capnp-message"
+version = "0.1.0"
+edition = "2021"
+build = "src/build.rs"
+
+[dependencies]
+capnp  = "0.20.1"
+chrono = { version = "0.4", features = ["serde"] }
+
+[build-dependencies]
+capnpc = "0.20.0"
