@@ -1,0 +1,8 @@
+{
+    "mode": "peer",
+    // "mode": "client",
+    "connect": {
+        // "endpoints": ["tcp/localhost:7447", "tcp/13.114.161.130:7447"],
+        "endpoints": ["tcp/13.114.161.130:7447"],
+    },
+}
