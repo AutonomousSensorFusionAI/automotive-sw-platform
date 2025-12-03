@@ -24,8 +24,34 @@ struct HelloWorldType {
     message: String,
 }
 
+struct WriterListener;
+
+impl DataWriterListener for WriterListener {
+    type Foo = HelloWorldType;
+    fn on_publication_matched(
+        &self,
+        _writer: &int2dds::publication::data_writer::DataWriter<Self::Foo>,
+        status: &int2dds::infrastructure::status::PublicationMatchedStatus,
+    ) {
+        let change = status.current_count_change();
+        let count = status.current_count();
+
+        if change > 0 {
+            println!("Subscriber matched! Current: {}", count);
+        } else if change < 0 {
+            println!("Subscriber unmatched! Current: {}", count);
+        }
+
+        if count == 0 {
+            println!("No subscribers remaining.");
+        }
+    }
+}
+
 fn main() {
-    env_logger::builder().filter_level(log::LevelFilter::Error).init();
+    env_logger::builder()
+        .filter_level(log::LevelFilter::Error)
+        .init();
     let domain_id = 40;
     let participant_qos = DomainParticipantQos::default();
     let factory = DomainParticipantFactory::get_instance();
@@ -43,18 +69,28 @@ fn main() {
         )
         .unwrap();
 
-    let publisher =
-        participant.create_publisher(PublisherQos::default(), None, StatusMask::default()).unwrap();
+    let publisher = participant
+        .create_publisher(PublisherQos::default(), None, StatusMask::default())
+        .unwrap();
 
     let writer_qos = DataWriterQos {
         reliability: ReliabilityQosPolicy {
             kind: ReliabilityQosPolicyKind::Reliable,
-            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+            max_blocking_time: Duration {
+                sec: 0,
+                nanosec: 100_000_000,
+            },
         },
         ..Default::default()
     };
+    let listener = WriterListener;
     let writer = publisher
-        .create_datawriter::<HelloWorldType>(&topic, writer_qos, None, StatusMask::default())
+        .create_datawriter::<HelloWorldType>(
+            &topic,
+            writer_qos,
+            Some(Arc::new(listener)),
+            StatusMask::default(),
+        )
         .unwrap();
 
     println!(
@@ -65,7 +101,10 @@ fn main() {
 
     let mut i = 0;
     loop {
-        let data = HelloWorldType { index: i, message: "HelloWorld".to_string() };
+        let data = HelloWorldType {
+            index: i,
+            message: "HelloWorld".to_string(),
+        };
         writer.write(&data, InstanceHandle::NIL).unwrap();
         println!("Published {:?}", data);
         std::thread::sleep(std::time::Duration::from_millis(1000));
