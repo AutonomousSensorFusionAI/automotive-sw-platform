@@ -3,11 +3,10 @@ mod common;
 use chrono::Local;
 use clap::Parser;
 use common::{
-    get_current_time_ns, CommonArgs, LatencyTestData, PerformanceStats, PerformanceTestData,
-    ReliabilityMode, SubscriberArgs,
+    get_current_time_ns, LatencyTestData, PerformanceStats, PerformanceTestData, ReliabilityMode,
+    SubscriberArgs,
 };
 use int2dds::{
-    core::time::Duration,
     domain::{domain_participant_factory::DomainParticipantFactory, qos::DomainParticipantQos},
     infrastructure::status::StatusMask,
     subscription::{
@@ -18,7 +17,6 @@ use int2dds::{
     topic::qos::TopicQos,
 };
 use std::{
-    collections::HashMap,
     sync::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         Arc, Mutex,
@@ -26,7 +24,7 @@ use std::{
     thread,
     time::{Duration as StdDuration, Instant},
 };
-
+#[allow(dead_code)]
 struct ThroughputSubListener {
     stats: Arc<Mutex<PerformanceStats>>,
     expected_seq: Arc<Mutex<u64>>,
@@ -405,7 +403,6 @@ fn run_throughput_subscriber(args: &SubscriberArgs) {
     });
 
     // Wait for timeout thread or execution time, whichever comes first
-    let start = Instant::now();
     loop {
         if should_stop.load(Ordering::Acquire) {
             break;
@@ -498,6 +495,15 @@ fn run_latency_subscriber(args: &SubscriberArgs) {
             StatusMask::default(),
         )
         .expect("Failed to create topic");
+    let topic_echo = participant
+        .create_topic::<LatencyTestData>(
+            "latency_test_topic_echo",
+            "LatencyTestData",
+            TopicQos::default(),
+            None,
+            StatusMask::default(),
+        )
+        .expect("Failed to create topic");
 
     let subscriber = participant
         .create_subscriber(SubscriberQos::default(), None, StatusMask::default())
@@ -523,7 +529,7 @@ fn run_latency_subscriber(args: &SubscriberArgs) {
     let stats = listener.get_stats();
 
     let writer = publisher
-        .create_datawriter::<LatencyTestData>(&topic, writer_qos, None, StatusMask::default())
+        .create_datawriter::<LatencyTestData>(&topic_echo, writer_qos, None, StatusMask::default())
         .expect("Failed to create datawriter");
 
     listener.set_writer(writer);
