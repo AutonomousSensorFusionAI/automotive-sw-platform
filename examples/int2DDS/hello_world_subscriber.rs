@@ -34,6 +34,25 @@ struct ReaderListener;
 
 impl DataReaderListener for ReaderListener {
     type Foo = HelloWorldType;
+    fn on_subscription_matched(
+        &self,
+        _reader: &int2dds::subscription::data_reader::DataReader<Self::Foo>,
+        status: &int2dds::infrastructure::status::SubscriptionMatchedStatus,
+    ) {
+        let change = status.current_count_change();
+        let count = status.current_count();
+
+        if change > 0 {
+            println!("Publisher matched! Current: {}", count);
+        } else if change < 0 {
+            println!("Publisher unmatched! Current: {}", count);
+        }
+
+        if count == 0 {
+            println!("No Publishers remaining.");
+        }
+    }
+
     fn on_data_available(
         &self,
         reader: &int2dds::subscription::data_reader::DataReader<Self::Foo>,
