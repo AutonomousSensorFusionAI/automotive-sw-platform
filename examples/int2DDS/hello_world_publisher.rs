@@ -46,13 +46,15 @@ fn main() {
     let publisher =
         participant.create_publisher(PublisherQos::default(), None, StatusMask::default()).unwrap();
 
+    let writer_qos = DataWriterQos {
+        reliability: ReliabilityQosPolicy {
+            kind: ReliabilityQosPolicyKind::Reliable,
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+        },
+        ..Default::default()
+    };
     let writer = publisher
-        .create_datawriter::<HelloWorldType>(
-            &topic,
-            DataWriterQos::default(),
-            None,
-            StatusMask::default(),
-        )
+        .create_datawriter::<HelloWorldType>(&topic, writer_qos, None, StatusMask::default())
         .unwrap();
 
     println!(
