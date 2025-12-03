@@ -24,6 +24,24 @@ struct HelloWorldType {
     message: String,
 }
 
+struct PubListener;
+
+impl DataWriterListener for PubListener {
+    type Foo = HelloWorldType;
+    fn on_publication_matched(
+        &self,
+        _writer: &int2dds::publication::data_writer::DataWriter<Self::Foo>,
+        status: &int2dds::infrastructure::status::PublicationMatchedStatus,
+    ) {
+        if status.current_count() > 0 {
+            println!("Subscriber matched! Sending start signal...");
+        } else {
+            println!("No subscribers. Sending stop signal...");
+        }
+    }
+}
+
+
 fn main() {
     env_logger::builder().filter_level(log::LevelFilter::Error).init();
     let domain_id = 40;
@@ -53,8 +71,11 @@ fn main() {
         },
         ..Default::default()
     };
+
+    let listener = PubListener;
+
     let writer = publisher
-        .create_datawriter::<HelloWorldType>(&topic, writer_qos, None, StatusMask::default())
+        .create_datawriter::<HelloWorldType>(&topic, writer_qos, Some(Arc::new(listener)), StatusMask::default())
         .unwrap();
 
     println!(
