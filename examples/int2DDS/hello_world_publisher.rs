@@ -99,6 +99,14 @@ fn main() {
         hostname::get().unwrap()
     );
 
+    let mut condition = writer.get_statuscondition().unwrap().clone();
+    condition
+        .set_enabled_statuses(StatusMask::PUBLICATION_MATCHED)
+        .unwrap();
+    let wait_set = WaitSet::new();
+    wait_set.attach_condition(condition).unwrap();
+    wait_set.wait(Duration::infinite()).unwrap();
+
     let mut i = 0;
     loop {
         let data = HelloWorldType {
