@@ -3,8 +3,8 @@ mod common;
 use chrono::Local;
 use clap::Parser;
 use common::{
-    create_latency_data, create_test_data, get_current_time_ns, CommonArgs, LatencyTestData,
-    PerformanceStats, PerformanceTestData, PublisherArgs, ReliabilityMode,
+    create_latency_data, create_test_data, get_current_time_ns, LatencyTestData, PerformanceStats,
+    PerformanceTestData, PublisherArgs, ReliabilityMode,
 };
 use int2dds::{
     common::instance_handle::InstanceHandle,
@@ -345,6 +345,15 @@ fn run_latency_test(args: &PublisherArgs) {
             StatusMask::default(),
         )
         .expect("Failed to create topic");
+    let topic_echo = participant
+        .create_topic::<LatencyTestData>(
+            "latency_test_topic_echo",
+            "LatencyTestData",
+            TopicQos::default(),
+            None,
+            StatusMask::default(),
+        )
+        .expect("Failed to create topic");
 
     let publisher = participant
         .create_publisher(PublisherQos::default(), None, StatusMask::default())
@@ -380,9 +389,9 @@ fn run_latency_test(args: &PublisherArgs) {
         )
         .expect("Failed to create datawriter");
 
-    let reader = subscriber
+    let _reader = subscriber
         .create_datareader::<LatencyTestData>(
-            &topic,
+            &topic_echo,
             reader_qos,
             Some(Arc::clone(&listener) as Arc<dyn DataReaderListener<Foo = LatencyTestData>>),
             StatusMask::default(),
