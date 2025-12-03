@@ -52,13 +52,15 @@ fn main() {
         .create_subscriber(SubscriberQos::default(), None, StatusMask::default())
         .unwrap();
 
+    let reader_qos = DataReaderQos {
+        reliability: ReliabilityQosPolicy {
+            kind: ReliabilityQosPolicyKind::Reliable,
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+        },
+        ..Default::default()
+    };
     let _reader = subscriber
-        .create_datareader::<HelloWorldType>(
-            &topic,
-            DataReaderQos::default(),
-            None,
-            StatusMask::default(),
-        )
+        .create_datareader::<HelloWorldType>(&topic, reader_qos, None, StatusMask::default())
         .unwrap();
 
     println!(
