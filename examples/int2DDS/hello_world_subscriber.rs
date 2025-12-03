@@ -30,6 +30,28 @@ struct HelloWorldType {
     message: String,
 }
 
+struct ReaderListener;
+
+impl DataReaderListener for ReaderListener {
+    type Foo = HelloWorldType;
+    fn on_data_available(
+        &self,
+        reader: &int2dds::subscription::data_reader::DataReader<Self::Foo>,
+    ) {
+        if let Ok(samples) = reader.take(
+            1,
+            &[SampleStateKind::ANY_SAMPLE_STATE],
+            &[ViewStateKind::ANY_VIEW_STATE],
+            &[InstanceStateKind::ANY_INSTANCE_STATE],
+        ) {
+            for sample in samples.iter() {
+                let sample = sample.data().unwrap();
+                println!("{:?}", sample);
+            }
+        }
+    }
+}
+
 fn main() {
     let domain_id = 40;
     let participant_qos = DomainParticipantQos::default();
@@ -55,12 +77,21 @@ fn main() {
     let reader_qos = DataReaderQos {
         reliability: ReliabilityQosPolicy {
             kind: ReliabilityQosPolicyKind::Reliable,
-            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+            max_blocking_time: Duration {
+                sec: 0,
+                nanosec: 100_000_000,
+            },
         },
         ..Default::default()
     };
+    let read_listener = ReaderListener;
     let _reader = subscriber
-        .create_datareader::<HelloWorldType>(&topic, reader_qos, None, StatusMask::default())
+        .create_datareader::<HelloWorldType>(
+            &topic,
+            reader_qos,
+            Some(Arc::new(read_listener)),
+            StatusMask::default(),
+        )
         .unwrap();
 
     println!(
