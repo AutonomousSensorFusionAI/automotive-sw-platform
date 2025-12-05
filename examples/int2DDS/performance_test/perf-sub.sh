@@ -11,6 +11,9 @@ declare -a TESTS=(
     "throughput 65536 700"
     "latency 1024 1000"
     "throughput 1024 1000"
+    "local_latency 1024 1000"
+    "local_latency 65536 700"
+    "local_latency 1048576 60"
 )
 
 LOGFILE="./subscriber.log"
