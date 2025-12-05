@@ -9,6 +9,7 @@ use int2dds::{
         log::{LogLevel, LogType},
     },
     core::time::Duration,
+    dcps::infrastructure::qos_policy::{HistoryQosPolicy, HistoryQosPolicyKind},
     domain::{domain_participant_factory::DomainParticipantFactory, qos::DomainParticipantQos},
     infrastructure::{
         qos_policy::{ReliabilityQosPolicy, ReliabilityQosPolicyKind},
@@ -94,6 +95,7 @@ fn main() {
         .unwrap();
 
     let reader_qos = DataReaderQos {
+        history: HistoryQosPolicy { kind: HistoryQosPolicyKind::KeepLast(10) },
         reliability: ReliabilityQosPolicy {
             kind: ReliabilityQosPolicyKind::Reliable,
             max_blocking_time: Duration {
