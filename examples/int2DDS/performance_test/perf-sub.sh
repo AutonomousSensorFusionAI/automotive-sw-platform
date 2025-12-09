@@ -35,7 +35,8 @@ do
 
         start_time=$(date +%s)
 
-        ./perftest_subscriber --execution-time 30 --test-mode $test_mode --data-len $data_len --hz $hz 2>&1 | tee -a "$LOGFILE"
+        # INT2DDS_TRANSPORT=shm ./perftest_subscriber --execution-time 30 --test-mode $test_mode --warmup-time 2 --data-len $data_len --hz $hz 2>&1 | tee -a "$LOGFILE"
+        ./perftest_subscriber --execution-time 30 --test-mode $test_mode --warmup-time 2 --data-len $data_len --hz $hz 2>&1 | tee -a "$LOGFILE"
 
         end_time=$(date +%s)
         elapsed=$((end_time - start_time))

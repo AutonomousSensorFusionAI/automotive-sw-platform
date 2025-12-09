@@ -34,6 +34,7 @@ do
         echo "Starting perftest_publisher $test_mode (Run $i/$REPEAT_COUNT) $data_len bytes $hz hz" 2>&1 | tee -a "$LOGFILE"
         start_time=$(date +%s)
 
+        # INT2DDS_TRANSPORT=shm ./perftest_publisher --execution-time 30 --test-mode $test_mode --warmup-time 2 --data-len $data_len --hz $hz 2>&1 | tee -a "$LOGFILE"
         ./perftest_publisher --execution-time 30 --test-mode $test_mode --warmup-time 2 --data-len $data_len --hz $hz 2>&1 | tee -a "$LOGFILE"
         STATUS=${PIPESTATUS[0]}
 
