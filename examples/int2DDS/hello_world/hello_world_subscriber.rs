@@ -32,6 +32,12 @@ struct HelloWorldType {
 
 struct ReaderListener;
 
+impl Clone for ReaderListener {
+    fn clone(&self) -> Self {
+        ReaderListener
+    }
+}
+
 impl DataReaderListener for ReaderListener {
     type Foo = HelloWorldType;
     fn on_subscription_matched(
@@ -105,8 +111,26 @@ fn main() {
     let _reader = subscriber
         .create_datareader::<HelloWorldType>(
             &topic,
-            reader_qos,
-            Some(Arc::new(read_listener)),
+            reader_qos.clone(),
+            Some(Arc::new(read_listener.clone())),
+            StatusMask::default(),
+        )
+        .unwrap();
+
+    let reader_qos_2 = DataReaderQos {
+        history: HistoryQosPolicy { kind: HistoryQosPolicyKind::KeepLast(10) },
+        reliability: ReliabilityQosPolicy {
+            kind: ReliabilityQosPolicyKind::BestEffort,
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+        },
+        ..Default::default()
+    };
+
+    let _reader_2 = subscriber
+        .create_datareader::<HelloWorldType>(
+            &topic,
+            reader_qos_2,
+            Some(Arc::new(read_listener.clone())),
             StatusMask::default(),
         )
         .unwrap();

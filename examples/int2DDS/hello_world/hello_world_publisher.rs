@@ -25,6 +25,12 @@ struct HelloWorldType {
 
 struct WriterListener;
 
+impl Clone for WriterListener {
+    fn clone(&self) -> Self {
+        WriterListener
+    }
+}
+
 impl DataWriterListener for WriterListener {
     type Foo = HelloWorldType;
     fn on_publication_matched(
@@ -81,7 +87,7 @@ fn main() {
         .create_datawriter::<HelloWorldType>(
             &topic,
             writer_qos,
-            Some(Arc::new(listener)),
+            Some(Arc::new(listener.clone())),
             StatusMask::default(),
         )
         .unwrap();
@@ -91,6 +97,23 @@ fn main() {
         domain_id,
         hostname::get().unwrap()
     );
+
+    let writer_qos_2 = DataWriterQos {
+        reliability: ReliabilityQosPolicy {
+            kind: ReliabilityQosPolicyKind::BestEffort,
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
+        },
+        ..Default::default()
+    };
+
+    let writer_2 = publisher
+        .create_datawriter::<HelloWorldType>(
+            &topic,
+            writer_qos_2,
+            Some(Arc::new(listener.clone())),
+            StatusMask::default(),
+        )
+        .unwrap();
 
     let mut condition = writer.get_statuscondition().unwrap().clone();
     condition.set_enabled_statuses(StatusMask::PUBLICATION_MATCHED).unwrap();
@@ -102,7 +125,10 @@ fn main() {
     loop {
         let data = HelloWorldType { index: i, message: "HelloWorld".to_string() };
         writer.write(&data, InstanceHandle::NIL).unwrap();
-        println!("Published {:?}", data);
+
+        let data_2 = HelloWorldType { index: i, message: "HelloWorld_2".to_string() };
+        writer_2.write(&data_2, InstanceHandle::NIL).unwrap();
+        println!("Published {:?} and {:?}", data, data_2);
         std::thread::sleep(std::time::Duration::from_millis(1000));
         i += 1;
     }
