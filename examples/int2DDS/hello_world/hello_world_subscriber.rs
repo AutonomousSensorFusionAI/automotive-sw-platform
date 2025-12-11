@@ -22,9 +22,8 @@ use int2dds::{
     },
     topic::{qos::TopicQos, type_support::DdsType},
 };
-use speedy::{Readable, Writable};
 
-#[derive(DdsType, Readable, Writable)]
+#[derive(DdsType)]
 #[dds_type(crate_path = "int2dds")]
 struct HelloWorldType {
     index: u32,
@@ -98,10 +97,7 @@ fn main() {
         history: HistoryQosPolicy { kind: HistoryQosPolicyKind::KeepLast(10) },
         reliability: ReliabilityQosPolicy {
             kind: ReliabilityQosPolicyKind::Reliable,
-            max_blocking_time: Duration {
-                sec: 0,
-                nanosec: 100_000_000,
-            },
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
         },
         ..Default::default()
     };

@@ -15,9 +15,8 @@ use int2dds::{
     },
     topic::{qos::TopicQos, type_support::DdsType},
 };
-use speedy::{Readable, Writable};
 
-#[derive(DdsType, Readable, Writable)]
+#[derive(DdsType)]
 #[dds_type(crate_path = "int2dds")]
 struct HelloWorldType {
     index: u32,
@@ -49,9 +48,7 @@ impl DataWriterListener for WriterListener {
 }
 
 fn main() {
-    env_logger::builder()
-        .filter_level(log::LevelFilter::Error)
-        .init();
+    env_logger::builder().filter_level(log::LevelFilter::Error).init();
     let domain_id = 40;
     let participant_qos = DomainParticipantQos::default();
     let factory = DomainParticipantFactory::get_instance();
@@ -69,17 +66,13 @@ fn main() {
         )
         .unwrap();
 
-    let publisher = participant
-        .create_publisher(PublisherQos::default(), None, StatusMask::default())
-        .unwrap();
+    let publisher =
+        participant.create_publisher(PublisherQos::default(), None, StatusMask::default()).unwrap();
 
     let writer_qos = DataWriterQos {
         reliability: ReliabilityQosPolicy {
             kind: ReliabilityQosPolicyKind::Reliable,
-            max_blocking_time: Duration {
-                sec: 0,
-                nanosec: 100_000_000,
-            },
+            max_blocking_time: Duration { sec: 0, nanosec: 100_000_000 },
         },
         ..Default::default()
     };
@@ -100,19 +93,14 @@ fn main() {
     );
 
     let mut condition = writer.get_statuscondition().unwrap().clone();
-    condition
-        .set_enabled_statuses(StatusMask::PUBLICATION_MATCHED)
-        .unwrap();
+    condition.set_enabled_statuses(StatusMask::PUBLICATION_MATCHED).unwrap();
     let wait_set = WaitSet::new();
     wait_set.attach_condition(condition).unwrap();
     wait_set.wait(Duration::infinite()).unwrap();
 
     let mut i = 0;
     loop {
-        let data = HelloWorldType {
-            index: i,
-            message: "HelloWorld".to_string(),
-        };
+        let data = HelloWorldType { index: i, message: "HelloWorld".to_string() };
         writer.write(&data, InstanceHandle::NIL).unwrap();
         println!("Published {:?}", data);
         std::thread::sleep(std::time::Duration::from_millis(1000));
