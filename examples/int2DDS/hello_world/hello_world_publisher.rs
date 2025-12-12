@@ -51,6 +51,14 @@ impl DataWriterListener for WriterListener {
             println!("No subscribers remaining.");
         }
     }
+
+    fn on_offered_incompatible_qos(
+        &self,
+        _writer: &int2dds::publication::data_writer::DataWriter<Self::Foo>,
+        status: &int2dds::infrastructure::status::OfferedIncompatibleQosStatus,
+    ) {
+        println!("DataWriter offered incompatible QoS: {:?}", status);
+    }
 }
 
 fn main() {

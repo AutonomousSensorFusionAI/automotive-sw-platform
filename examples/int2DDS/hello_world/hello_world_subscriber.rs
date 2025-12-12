@@ -75,6 +75,13 @@ impl DataReaderListener for ReaderListener {
             }
         }
     }
+    fn on_requested_incompatible_qos(
+        &self,
+        _reader: &int2dds::subscription::data_reader::DataReader<Self::Foo>,
+        status: &int2dds::infrastructure::status::RequestedIncompatibleQosStatus,
+    ) {
+        println!("DataReader requested incompatible QoS: {:?}", status);
+    }
 }
 
 fn main() {
